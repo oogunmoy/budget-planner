@@ -1322,159 +1322,6 @@ body.light .theme-toggle .theme-icon {
     opacity: 0.85;
 }
 
-/* ============================================================
-   FEATURE: Paycheck Calendar
-   ============================================================ */
-.paycheck-calendar {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 0.75rem;
-}
-
-.cal-month {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 0.75rem;
-}
-
-.cal-month-name {
-    font-size: 0.78rem;
-    font-weight: 700;
-    color: var(--accent-light);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 0.5rem;
-    text-align: center;
-}
-
-.cal-days {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 2px;
-}
-
-.cal-day-header {
-    font-size: 0.55rem;
-    color: var(--text-dim);
-    text-align: center;
-    padding: 2px 0;
-    font-weight: 600;
-}
-
-.cal-day {
-    font-size: 0.6rem;
-    text-align: center;
-    padding: 3px 1px;
-    border-radius: 4px;
-    color: var(--text-dim);
-    min-height: 22px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-}
-
-.cal-day.empty {
-    visibility: hidden;
-}
-
-.cal-day.payday {
-    background: rgba(108, 92, 231, 0.25);
-    color: var(--accent-light);
-    font-weight: 700;
-    border: 1px solid rgba(108, 92, 231, 0.4);
-    cursor: default;
-    position: relative;
-}
-
-.cal-day.payday::after {
-    content: '$';
-    position: absolute;
-    top: -2px;
-    right: 0px;
-    font-size: 0.4rem;
-    color: var(--green);
-    font-weight: 700;
-}
-
-.cal-month-total {
-    font-size: 0.7rem;
-    text-align: center;
-    color: var(--green);
-    font-weight: 600;
-    margin-top: 0.5rem;
-    padding-top: 0.4rem;
-    border-top: 1px solid var(--border);
-}
-
-.cal-legend {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: 1rem;
-    font-size: 0.8rem;
-    color: var(--text-dim);
-    flex-wrap: wrap;
-}
-
-.cal-legend-item {
-    display: flex;
-    align-items: center;
-    gap: 0.35rem;
-}
-
-.cal-legend-dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 3px;
-    background: rgba(108, 92, 231, 0.25);
-    border: 1px solid rgba(108, 92, 231, 0.4);
-}
-
-.cal-summary {
-    margin-top: 1rem;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 0.75rem;
-}
-
-.cal-summary-stat {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 0.85rem;
-    text-align: center;
-}
-
-.cal-summary-stat .cs-label {
-    font-size: 0.72rem;
-    color: var(--text-dim);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 0.25rem;
-}
-
-.cal-summary-stat .cs-value {
-    font-size: 1.05rem;
-    font-weight: 700;
-    color: var(--text);
-}
-
-@media (max-width: 768px) {
-    .paycheck-calendar {
-        grid-template-columns: repeat(2, 1fr);
-    }
-    .cal-summary {
-        grid-template-columns: 1fr;
-    }
-}
-
-@media (max-width: 480px) {
-    .paycheck-calendar {
-        grid-template-columns: 1fr;
-    }
-}
 
 /* ============================================================
    FEATURE: Tax Refund Estimator
@@ -1752,6 +1599,19 @@ body.light .theme-toggle .theme-icon {
             <h3 style="color:var(--green); margin:1rem 0 0.5rem;">Step 10: Export to Excel</h3>
             <p>Click <strong>Export Budget to Excel</strong> to download a styled spreadsheet. You can upload an existing <code>.xlsx</code> file to append a new sheet — great for tracking budgets month over month.</p>
 
+            <h3 style="color:var(--accent-light); margin:1rem 0 0.5rem;">🧰 Toolbar Features</h3>
+            <p>The header toolbar provides quick access to power features:</p>
+            <ul style="margin-left:1.5rem; margin-bottom:0.5rem;">
+                <li><strong>🌙 Theme Toggle</strong> — switch between dark and light modes (saved automatically)</li>
+                <li><strong>💾 Presets</strong> — save your entire budget as a named preset, load or delete saved presets</li>
+                <li><strong>🔗 Share</strong> — encodes your budget into a URL you can copy and share with anyone</li>
+                <li><strong>🔀 What-If</strong> — compare your current budget against a hypothetical scenario side-by-side</li>
+                <li><strong>🖨️ Print</strong> — print a clean, paper-friendly version of your budget</li>
+            </ul>
+
+            <h3 style="color:var(--orange); margin:1rem 0 0.5rem;">🧾 Tax Refund Estimator</h3>
+            <p>Scroll down to see the <strong>Tax Refund Estimator</strong>, which compares your total withholding against your actual tax liability. It shows whether you'll likely get a <strong>refund</strong> or <strong>owe</strong> at tax time, with tips on adjusting your W-4.</p>
+
             <div style="margin-top:1.5rem; padding:1rem; background:var(--surface2); border-radius:10px; font-size:0.85rem; color:var(--text-dim);">
                 💡 <strong>Tip:</strong> All calculations update instantly as you type. Start with your salary and work your way down — the tool builds on each section.
             </div>
@@ -1940,12 +1800,6 @@ body.light .theme-toggle .theme-icon {
     <div class="card" id="cashflowCard" style="display:none;">
         <h2><span class="icon icon-summary">📊</span> Annual Cash Flow Analysis</h2>
         <div id="cashflowContent"></div>
-    </div>
-
-    <!-- Row 4.7: Paycheck Calendar -->
-    <div class="card" id="paycheckCalendarCard" style="display:none;">
-        <h2><span class="icon icon-income">📅</span> Paycheck Calendar</h2>
-        <div id="paycheckCalendarContent"></div>
     </div>
 
     <!-- Row 4.8: Tax Refund Estimator -->
@@ -4287,7 +4141,6 @@ calculate = function() {
     validateAllInputs();
     _originalCalculate.apply(this, arguments);
     // Render new feature sections after main calculation
-    renderPaycheckCalendar();
     renderTaxRefundEstimator();
 };
 
@@ -4769,133 +4622,6 @@ function runWhatIfComparison() {
 // ============================================================
 function printBudget() {
     window.print();
-}
-
-// ============================================================
-// FEATURE: Paycheck Calendar
-// ============================================================
-function renderPaycheckCalendar() {
-    const card = document.getElementById('paycheckCalendarCard');
-    const content = document.getElementById('paycheckCalendarContent');
-    if (!card || !content) return;
-
-    const salary = parseCurrency(document.getElementById('annualSalary').value);
-    if (salary <= 0) {
-        card.style.display = 'none';
-        return;
-    }
-    card.style.display = '';
-
-    const paychecks = getPaychecks();
-    const freq = parseInt(document.getElementById('payFrequency').value);
-    const year = new Date().getFullYear();
-    const takeHomePP = parseCurrency(document.getElementById('takeHomeAmount')?.textContent || '0');
-
-    // Generate all paycheck dates for the year
-    const paycheckDates = [];
-
-    if (freq === 24) {
-        // Semi-monthly: 1st and 15th of each month
-        for (let m = 0; m < 12; m++) {
-            paycheckDates.push(new Date(year, m, 1));
-            paycheckDates.push(new Date(year, m, 15));
-        }
-    } else if (freq === 12) {
-        // Monthly: 1st of each month
-        for (let m = 0; m < 12; m++) {
-            paycheckDates.push(new Date(year, m, 1));
-        }
-    } else if (freq === 26) {
-        // Biweekly: every other Friday starting first Friday of year
-        let d = new Date(year, 0, 1);
-        while (d.getDay() !== 5) d.setDate(d.getDate() + 1); // Find first Friday
-        while (d.getFullYear() === year) {
-            paycheckDates.push(new Date(d));
-            d.setDate(d.getDate() + 14);
-        }
-    } else if (freq === 52) {
-        // Weekly: every Friday
-        let d = new Date(year, 0, 1);
-        while (d.getDay() !== 5) d.setDate(d.getDate() + 1); // Find first Friday
-        while (d.getFullYear() === year) {
-            paycheckDates.push(new Date(d));
-            d.setDate(d.getDate() + 7);
-        }
-    }
-
-    // Build a set of payday keys for fast lookup: "M-D"
-    const paydaySet = new Set();
-    paycheckDates.forEach(d => {
-        paydaySet.add(d.getMonth() + '-' + d.getDate());
-    });
-
-    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
-        'July', 'August', 'September', 'October', 'November', 'December'];
-    const dayHeaders = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
-    const freqLabels = { 52: 'Weekly (every Friday)', 26: 'Biweekly (every other Friday)', 24: 'Semi-monthly (1st & 15th)', 12: 'Monthly (1st)' };
-
-    let calHTML = `
-        <div class="cal-legend">
-            <div class="cal-legend-item"><div class="cal-legend-dot"></div> Payday</div>
-            <div class="cal-legend-item" style="color: var(--text-dim);">📆 ${freqLabels[freq] || freq + ' paychecks'} · ${paycheckDates.length} paychecks in ${year}</div>
-        </div>
-        <div class="paycheck-calendar">
-    `;
-
-    let annualTotal = 0;
-
-    for (let m = 0; m < 12; m++) {
-        const firstDay = new Date(year, m, 1).getDay();
-        const daysInMonth = new Date(year, m + 1, 0).getDate();
-        let monthPaydays = 0;
-
-        let monthHTML = `<div class="cal-month"><div class="cal-month-name">${monthNames[m]}</div><div class="cal-days">`;
-
-        // Day headers
-        dayHeaders.forEach(dh => {
-            monthHTML += `<div class="cal-day-header">${dh}</div>`;
-        });
-
-        // Empty cells for offset
-        for (let i = 0; i < firstDay; i++) {
-            monthHTML += '<div class="cal-day empty"></div>';
-        }
-
-        // Day cells
-        for (let d = 1; d <= daysInMonth; d++) {
-            const isPayday = paydaySet.has(m + '-' + d);
-            if (isPayday) monthPaydays++;
-            monthHTML += `<div class="cal-day${isPayday ? ' payday' : ''}" ${isPayday ? 'title="Payday: ' + fmt(takeHomePP) + '"' : ''}>${d}</div>`;
-        }
-
-        const monthTotal = monthPaydays * takeHomePP;
-        annualTotal += monthTotal;
-
-        monthHTML += `</div><div class="cal-month-total">${monthPaydays} check${monthPaydays !== 1 ? 's' : ''} · ${fmt(monthTotal)}</div></div>`;
-        calHTML += monthHTML;
-    }
-
-    calHTML += '</div>';
-
-    // Summary stats
-    calHTML += `
-        <div class="cal-summary">
-            <div class="cal-summary-stat">
-                <div class="cs-label">Total Paychecks</div>
-                <div class="cs-value">${paycheckDates.length}</div>
-            </div>
-            <div class="cal-summary-stat">
-                <div class="cs-label">Per Paycheck</div>
-                <div class="cs-value" style="color: var(--green);">${fmt(takeHomePP)}</div>
-            </div>
-            <div class="cal-summary-stat">
-                <div class="cs-label">Annual Take-Home</div>
-                <div class="cs-value" style="color: var(--accent-light);">${fmt(annualTotal)}</div>
-            </div>
-        </div>
-    `;
-
-    content.innerHTML = calHTML;
 }
 
 // ============================================================

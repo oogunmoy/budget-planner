@@ -65,6 +65,41 @@ Clearly separated **pre-tax** and **post-tax** deductions:
 - Auto-fetches `limits.json` for future updates
 - Warning message for years not yet announced
 
+### 🌙 Dark/Light Theme Toggle
+- Switch between dark and light modes via the toolbar
+- Preference saved to `localStorage` and restored on reload
+
+### 💾 Save/Load Presets
+- Save your entire budget configuration as a named preset
+- Load or delete presets — stored in `localStorage`
+- Captures all form fields, budget items, and debts
+
+### 🔗 Share via URL
+- Encodes your full budget state into the URL hash
+- One-click copy to clipboard for sharing with others
+- Recipients load the exact same configuration automatically
+
+### 🔀 What-If Scenarios
+- Side-by-side comparison modal: **Current** vs **Hypothetical**
+- Edit salary, 401(k) %, filing status, state, HSA, and ESPP
+- Shows differences in take-home, taxes, savings, and effective rate
+
+### 🧾 Tax Refund Estimator
+- Compares total annual withholding vs actual tax liability
+- Shows estimated **refund** or **amount owed**
+- Breaks down federal, FICA, state, and WA Cares taxes
+- W-4 adjustment tips for optimizing your withholding
+
+### 🖨️ Print-Friendly View
+- Clean print layout that hides controls and buttons
+- Forces light theme for readability on paper
+- Page-break-safe cards for multi-page budgets
+
+### ✅ Input Validation
+- Real-time validation with visual feedback (red borders, tooltips)
+- Range checks on all numeric fields (salary, percentages, deductions)
+- Non-blocking — highlights issues without preventing calculation
+
 ## Tech Stack
 
 - **Single HTML file** — zero build tools, zero dependencies
