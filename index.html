@@ -29,6 +29,7 @@
             color: var(--text);
             line-height: 1.6;
             min-height: 100vh;
+            overflow-x: hidden;
         }
 
         header {
@@ -298,7 +299,19 @@
             .form-row { grid-template-columns: 1fr; }
             .summary-grid { grid-template-columns: 1fr; }
             header { padding: 1.5rem 1rem; }
-            header h1 { font-size: 1.4rem; }
+            header h1 { font-size: 1.3rem; }
+            header p { font-size: 0.8rem; }
+            .container { padding: 0.75rem; gap: 1rem; }
+            .card { padding: 1rem; }
+            .card h2 { font-size: 1rem; }
+            .paycheck-card .paycheck-amount { font-size: 1.8rem; }
+            .breakdown-label { min-width: 70px; font-size: 0.75rem; }
+            .breakdown-amount { min-width: 70px; font-size: 0.78rem; }
+            input, select { font-size: 16px; } /* prevents iOS zoom on focus */
+            .list-item { gap: 0.35rem; }
+            .list-item input:first-child { flex: 1.5; }
+            #helpBtn { position: static !important; margin-top: 0.75rem; display: inline-block; padding: 0.4rem 0.8rem; font-size: 0.78rem; }
+            .guide-panel { margin: 0.5rem !important; padding: 1.25rem !important; max-height: 95vh !important; border-radius: 12px !important; }
         }
 
         /* Section subtotal inline */
@@ -490,6 +503,9 @@
 
         @media (max-width: 768px) {
             .frontload-timeline { grid-template-columns: 1fr; }
+            .phase-card .phase-amount { font-size: 1.1rem; }
+            .milestone-row { gap: 0.5rem; }
+            .milestone-value { font-size: 0.78rem; min-width: auto; }
         }
 
         /* IRS Limits editable section */
@@ -612,7 +628,10 @@
 
         @media (max-width: 768px) {
             .cashflow-phases { grid-template-columns: 1fr; }
-            .cf-month-grid { grid-template-columns: repeat(6, 1fr); }
+            .cf-month-grid { grid-template-columns: repeat(4, 1fr); }
+            .cf-month .month-val { font-size: 0.58rem; }
+            .cf-annual-card .cf-big { font-size: 1.5rem; }
+            .cf-annual-card .cf-sub { font-size: 0.75rem; }
         }
 
         /* Debt Payoff */
@@ -678,7 +697,16 @@
         }
 
         @media (max-width: 768px) {
-            .debt-item { grid-template-columns: 1fr 1fr; }
+            .debt-item {
+                grid-template-columns: 1fr 1fr;
+                gap: 0.35rem;
+            }
+            .debt-item button.btn-remove {
+                grid-column: 2;
+                justify-self: end;
+            }
+            .debt-strategy { padding: 0.85rem; }
+            .debt-strategy .ds-row { font-size: 0.8rem; flex-wrap: wrap; }
         }
     </style>
 </head>
@@ -687,12 +715,12 @@
 <header>
     <h1>💰 Budget Builder</h1>
     <p>Paycheck planner with tax estimation, 401(k) front-loading & debt payoff</p>
-    <button onclick="toggleGuide();" style="position:absolute; top:1.5rem; right:1.5rem; background:rgba(255,255,255,0.2); border:1px solid rgba(255,255,255,0.4); color:white; padding:0.5rem 1rem; border-radius:8px; cursor:pointer; font-size:0.85rem; font-weight:600;">❓ How to Use</button>
+    <button id="helpBtn" onclick="toggleGuide();" style="position:absolute; top:1.5rem; right:1.5rem; background:rgba(255,255,255,0.2); border:1px solid rgba(255,255,255,0.4); color:white; padding:0.5rem 1rem; border-radius:8px; cursor:pointer; font-size:0.85rem; font-weight:600;">❓ How to Use</button>
 </header>
 
 <!-- Help Guide Overlay -->
 <div id="guideOverlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:1000; overflow-y:auto;" onclick="if(event.target===this)toggleGuide();">
-    <div style="max-width:700px; margin:2rem auto; background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:2rem; position:relative; max-height:90vh; overflow-y:auto;">
+    <div class="guide-panel" style="max-width:700px; margin:2rem auto; background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:2rem; position:relative; max-height:90vh; overflow-y:auto;">
         <button onclick="toggleGuide();" style="position:absolute; top:1rem; right:1rem; background:none; border:none; color:var(--text-dim); font-size:1.5rem; cursor:pointer;">✕</button>
         <h2 style="font-size:1.4rem; margin-bottom:1.5rem;">📖 How to Use Budget Builder</h2>
 
