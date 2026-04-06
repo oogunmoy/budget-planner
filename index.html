@@ -35,6 +35,7 @@
             background: linear-gradient(135deg, var(--accent), #4834d4);
             padding: 2rem;
             text-align: center;
+            position: relative;
         }
 
         header h1 { font-size: 1.8rem; font-weight: 700; letter-spacing: -0.5px; }
@@ -686,7 +687,81 @@
 <header>
     <h1>💰 Budget Builder Pro</h1>
     <p>Semi-monthly paycheck planner with tax estimation, 401(k) front-loading & debt payoff</p>
+    <button onclick="toggleGuide();" style="position:absolute; top:1.5rem; right:1.5rem; background:rgba(255,255,255,0.2); border:1px solid rgba(255,255,255,0.4); color:white; padding:0.5rem 1rem; border-radius:8px; cursor:pointer; font-size:0.85rem; font-weight:600;">❓ How to Use</button>
 </header>
+
+<!-- Help Guide Overlay -->
+<div id="guideOverlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:1000; overflow-y:auto;" onclick="if(event.target===this)toggleGuide();">
+    <div style="max-width:700px; margin:2rem auto; background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:2rem; position:relative; max-height:90vh; overflow-y:auto;">
+        <button onclick="toggleGuide();" style="position:absolute; top:1rem; right:1rem; background:none; border:none; color:var(--text-dim); font-size:1.5rem; cursor:pointer;">✕</button>
+        <h2 style="font-size:1.4rem; margin-bottom:1.5rem;">📖 How to Use Budget Builder Pro</h2>
+
+        <div style="font-size:0.9rem; line-height:1.8; color:var(--text);">
+            <h3 style="color:var(--accent-light); margin:1rem 0 0.5rem;">Step 1: Enter Your Income</h3>
+            <p>Enter your <strong>annual salary</strong>, select your <strong>filing status</strong> and <strong>state</strong>. The tool calculates your gross pay per paycheck (salary ÷ 24).</p>
+            <p>If your paycheck withholds extra federal tax (for RSUs, bonuses, etc.), enter that in <strong>W-4 Extra Withholding</strong>.</p>
+
+            <h3 style="color:var(--accent-light); margin:1rem 0 0.5rem;">Step 2: Set Your IRS Limits</h3>
+            <p>Click <strong>⚙️ IRS Contribution Limits</strong> to select the tax year. Limits for 2024–2026 are built in. Future years show a warning and use the latest available.</p>
+
+            <h3 style="color:var(--green); margin:1rem 0 0.5rem;">Step 3: Pre-Tax Deductions</h3>
+            <p>These reduce your taxable income:</p>
+            <ul style="margin-left:1.5rem; margin-bottom:0.5rem;">
+                <li><strong>401(k) Employee %</strong> — your pre-tax contribution as % of gross</li>
+                <li><strong>Employer Match %</strong> — percentage of <em>your</em> contribution the employer matches (e.g. 50% means they add $0.50 per $1 you contribute)</li>
+                <li><strong>HSA</strong> — your per-paycheck amount + employer annual lump sum</li>
+                <li><strong>AD&D Insurance</strong> — per paycheck</li>
+            </ul>
+
+            <h3 style="color:var(--orange); margin:1rem 0 0.5rem;">Step 4: Post-Tax Deductions</h3>
+            <p>These come out of your paycheck but do NOT reduce taxes:</p>
+            <ul style="margin-left:1.5rem; margin-bottom:0.5rem;">
+                <li><strong>After-Tax 401(k) %</strong> — mega backdoor Roth contributions</li>
+                <li><strong>ESPP %</strong> — employee stock purchase plan</li>
+                <li><strong>Legal Plan / LTD Offset</strong> — per paycheck amounts</li>
+            </ul>
+
+            <h3 style="color:var(--red); margin:1rem 0 0.5rem;">Step 5: Review Tax Breakdown</h3>
+            <p>See your estimated federal, Social Security, Medicare, state, and WA Cares taxes per paycheck. These are <em>estimates</em> based on tax brackets — your actual withholding depends on your W-4.</p>
+
+            <h3 style="color:var(--accent-light); margin:1rem 0 0.5rem;">Step 6: 401(k) Front-Load Tracker</h3>
+            <p>If you contribute to a 401(k), the tracker shows:</p>
+            <ul style="margin-left:1.5rem; margin-bottom:0.5rem;">
+                <li>Separate progress bars for employee pre-tax, employer match, and after-tax</li>
+                <li>Combined 415(c) stacked bar ($72k limit for 2026)</li>
+                <li>Exact paycheck # and date when each limit is hit</li>
+                <li>Side-by-side take-home comparison: during front-loading vs after max-out</li>
+            </ul>
+
+            <h3 style="color:var(--green); margin:1rem 0 0.5rem;">Step 7: Add Bills, Spending & Savings</h3>
+            <p>Add your <strong>monthly</strong> expenses. Click <strong>+ Add</strong> to add rows, <strong>×</strong> to remove. These are used by the cash flow analysis.</p>
+
+            <h3 style="color:var(--blue); margin:1rem 0 0.5rem;">Step 8: Annual Cash Flow Analysis</h3>
+            <p>Because front-loading means uneven paychecks, this section shows:</p>
+            <ul style="margin-left:1.5rem; margin-bottom:0.5rem;">
+                <li><strong>Blended annual take-home</strong> — what you actually get across both phases</li>
+                <li><strong>Monthly budget allowance</strong> — annual ÷ 12, the safe amount to spend per month</li>
+                <li><strong>Savings buffer needed</strong> — cash reserve for the lean front-loading months</li>
+                <li><strong>12-month grid</strong> — green/red per month showing surplus or deficit</li>
+            </ul>
+
+            <h3 style="color:var(--red); margin:1rem 0 0.5rem;">Step 9: Debt Payoff Planner</h3>
+            <p>Add debts with name, type, balance, APR, minimum payment, and optional <strong>target payoff date</strong>. The tool:</p>
+            <ul style="margin-left:1.5rem; margin-bottom:0.5rem;">
+                <li>Calculates the <strong>required monthly payment</strong> to hit your target date</li>
+                <li>Checks if it's <strong>feasible</strong> within your surplus</li>
+                <li>Compares <strong>Avalanche</strong> (highest interest first) vs <strong>Snowball</strong> (smallest balance first) strategies</li>
+            </ul>
+
+            <h3 style="color:var(--green); margin:1rem 0 0.5rem;">Step 10: Export to Excel</h3>
+            <p>Click <strong>Export Budget to Excel</strong> to download a styled spreadsheet. You can upload an existing <code>.xlsx</code> file to append a new sheet — great for tracking budgets month over month.</p>
+
+            <div style="margin-top:1.5rem; padding:1rem; background:var(--surface2); border-radius:10px; font-size:0.85rem; color:var(--text-dim);">
+                💡 <strong>Tip:</strong> All calculations update instantly as you type. Start with your salary and work your way down — the tool builds on each section.
+            </div>
+        </div>
+    </div>
+</div>
 
 <div class="container">
 
@@ -1093,6 +1168,11 @@ function toggleLimits() {
     const arrow = document.getElementById('limitsArrow');
     content.classList.toggle('open');
     arrow.textContent = content.classList.contains('open') ? '▾' : '▸';
+}
+
+function toggleGuide() {
+    const overlay = document.getElementById('guideOverlay');
+    overlay.style.display = overlay.style.display === 'none' ? '' : 'none';
 }
 
 // ============================================================
