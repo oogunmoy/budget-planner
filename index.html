@@ -708,6 +708,950 @@
             .debt-strategy { padding: 0.85rem; }
             .debt-strategy .ds-row { font-size: 0.8rem; flex-wrap: wrap; }
         }
+/* ============================================================
+   FEATURE: Light Theme
+   ============================================================ */
+body.light {
+    --bg: #f0f2f5;
+    --surface: #ffffff;
+    --surface2: #f5f6f8;
+    --border: #d1d5db;
+    --text: #1f2937;
+    --text-dim: #6b7280;
+    --accent: #6c5ce7;
+    --accent-light: #5b4cdb;
+    --green: #059669;
+    --red: #dc2626;
+    --orange: #d97706;
+    --blue: #2563eb;
+}
+
+body.light header {
+    background: linear-gradient(135deg, #6c5ce7, #4834d4);
+}
+
+body.light input,
+body.light select {
+    background: var(--surface2);
+    border-color: var(--border);
+    color: var(--text);
+}
+
+body.light input:focus,
+body.light select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.15);
+}
+
+body.light .card {
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+body.light .paycheck-card {
+    background: linear-gradient(135deg, #ede9fe, #ddd6fe);
+    color: #1f2937;
+}
+
+body.light .paycheck-card .paycheck-amount {
+    color: #1f2937;
+}
+
+body.light .paycheck-card .paycheck-sub {
+    color: #4b5563;
+}
+
+body.light .btn-add {
+    border-color: var(--border);
+    color: var(--text-dim);
+}
+
+body.light .btn-add:hover {
+    background: var(--surface2);
+}
+
+body.light .limits-toggle {
+    background: var(--surface2);
+    color: var(--text);
+    border-color: var(--border);
+}
+
+body.light .breakdown-bar-bg {
+    background: var(--surface2);
+}
+
+body.light .debt-strategy {
+    background: var(--surface2);
+}
+
+/* ============================================================
+   FEATURE: Print Styles
+   ============================================================ */
+@media print {
+    body {
+        --bg: #ffffff !important;
+        --surface: #ffffff !important;
+        --surface2: #f9fafb !important;
+        --border: #d1d5db !important;
+        --text: #111827 !important;
+        --text-dim: #4b5563 !important;
+        background: #ffffff !important;
+        color: #111827 !important;
+        font-size: 11pt;
+    }
+
+    header {
+        background: #4834d4 !important;
+        padding: 1rem !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    #helpBtn,
+    .toolbar,
+    .preset-panel,
+    .btn-add,
+    .btn-remove,
+    .limits-toggle,
+    .limits-content,
+    #whatIfModal,
+    #excelUpload,
+    button,
+    .no-print {
+        display: none !important;
+    }
+
+    .card {
+        break-inside: avoid;
+        page-break-inside: avoid;
+        border: 1px solid #d1d5db !important;
+        box-shadow: none !important;
+        margin-bottom: 0.5rem;
+    }
+
+    .container {
+        max-width: 100%;
+        padding: 0.5rem;
+    }
+
+    .grid-2 {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .paycheck-card {
+        background: #f3f0ff !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    .breakdown-bar,
+    .bar-taxes,
+    .bar-deductions,
+    .bar-savings,
+    .bar-spending,
+    .bar-bills,
+    .bar-remaining {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+}
+
+/* ============================================================
+   FEATURE: Toolbar Styles
+   ============================================================ */
+.toolbar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+}
+
+.toolbar-btn {
+    background: rgba(255,255,255,0.2);
+    border: 1px solid rgba(255,255,255,0.4);
+    color: white;
+    padding: 0.5rem 0.75rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: background 0.2s, transform 0.1s;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.toolbar-btn:hover {
+    background: rgba(255,255,255,0.35);
+    transform: translateY(-1px);
+}
+
+.toolbar-btn:active {
+    transform: translateY(0);
+}
+
+/* ============================================================
+   FEATURE: Theme Toggle Button (animated sun/moon)
+   ============================================================ */
+.theme-toggle {
+    position: relative;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    border: 1px solid rgba(255,255,255,0.4);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    padding: 0;
+    transition: background 0.2s, transform 0.3s;
+    overflow: hidden;
+}
+
+.theme-toggle:hover {
+    background: rgba(255,255,255,0.35);
+    transform: scale(1.1);
+}
+
+.theme-toggle .theme-icon {
+    transition: transform 0.4s ease, opacity 0.3s ease;
+    display: inline-block;
+}
+
+body.light .theme-toggle .theme-icon {
+    transform: rotate(360deg);
+}
+
+/* ============================================================
+   FEATURE: Input Validation Styles
+   ============================================================ */
+.input-error {
+    border-color: var(--red) !important;
+    box-shadow: 0 0 0 3px rgba(225, 112, 85, 0.2) !important;
+    animation: shake 0.3s ease-in-out;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-4px); }
+    75% { transform: translateX(4px); }
+}
+
+.error-tooltip {
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--red);
+    color: #ffffff;
+    font-size: 0.72rem;
+    font-weight: 500;
+    padding: 0.35rem 0.65rem;
+    border-radius: 6px;
+    white-space: nowrap;
+    z-index: 100;
+    pointer-events: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    animation: tooltipFadeIn 0.2s ease-out;
+}
+
+.error-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: var(--red);
+}
+
+@keyframes tooltipFadeIn {
+    from { opacity: 0; transform: translateX(-50%) translateY(4px); }
+    to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+.form-group {
+    position: relative;
+}
+
+/* ============================================================
+   FEATURE: Preset Panel Styles
+   ============================================================ */
+.preset-panel {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 900;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    padding: 1.5rem;
+    animation: slideDown 0.25s ease-out;
+}
+
+.preset-panel.open {
+    display: block;
+}
+
+@keyframes slideDown {
+    from { transform: translateY(-100%); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.preset-panel-inner {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.preset-panel h3 {
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.preset-panel .preset-close {
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    font-size: 1.3rem;
+    cursor: pointer;
+    padding: 0.25rem;
+    line-height: 1;
+}
+
+.preset-panel .preset-close:hover {
+    color: var(--text);
+}
+
+.preset-save-row {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.preset-save-row input {
+    flex: 1;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.6rem 0.75rem;
+    color: var(--text);
+    font-size: 0.9rem;
+}
+
+.preset-save-row button {
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 0.6rem 1.2rem;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: opacity 0.2s;
+}
+
+.preset-save-row button:hover {
+    opacity: 0.85;
+}
+
+.preset-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    max-height: 250px;
+    overflow-y: auto;
+}
+
+.preset-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.65rem 0.85rem;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.preset-item:hover {
+    background: var(--border);
+}
+
+.preset-item-name {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text);
+}
+
+.preset-item-date {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    margin-left: 0.5rem;
+}
+
+.preset-item-actions {
+    display: flex;
+    gap: 0.4rem;
+    align-items: center;
+}
+
+.preset-item-actions button {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.3rem 0.6rem;
+    font-size: 0.75rem;
+    cursor: pointer;
+    color: var(--text-dim);
+    transition: all 0.15s;
+}
+
+.preset-item-actions button:hover {
+    background: var(--surface);
+    color: var(--text);
+}
+
+.preset-item-actions .preset-delete:hover {
+    color: var(--red);
+    border-color: var(--red);
+}
+
+.preset-empty {
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    padding: 1.5rem;
+}
+
+/* ============================================================
+   FEATURE: What-If Scenario Panel
+   ============================================================ */
+#whatIfModal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 1000;
+    overflow-y: auto;
+    animation: fadeIn 0.2s ease-out;
+}
+
+#whatIfModal.open {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 2rem 1rem;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.whatif-container {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    max-width: 900px;
+    width: 100%;
+    padding: 2rem;
+    position: relative;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    animation: modalSlideUp 0.3s ease-out;
+}
+
+@keyframes modalSlideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.whatif-container h2 {
+    font-size: 1.2rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.whatif-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    color: var(--text-dim);
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0.25rem;
+    line-height: 1;
+}
+
+.whatif-close:hover {
+    color: var(--text);
+}
+
+.whatif-grid {
+    display: grid;
+    grid-template-columns: 1fr 60px 1fr;
+    gap: 1rem;
+}
+
+.whatif-column {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+}
+
+.whatif-column h3 {
+    font-size: 0.95rem;
+    margin-bottom: 1rem;
+    color: var(--accent-light);
+    text-align: center;
+}
+
+.whatif-column.scenario-b h3 {
+    color: var(--green);
+}
+
+.whatif-field {
+    margin-bottom: 0.75rem;
+}
+
+.whatif-field label {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+.whatif-field input,
+.whatif-field select {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.5rem 0.65rem;
+    color: var(--text);
+    font-size: 0.88rem;
+}
+
+.whatif-diff-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.3rem;
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    padding-top: 2.5rem;
+}
+
+.whatif-diff-col .diff-arrow {
+    font-size: 1.5rem;
+    color: var(--accent);
+}
+
+.whatif-results {
+    margin-top: 1.5rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0.75rem;
+}
+
+.whatif-result-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem;
+    text-align: center;
+}
+
+.whatif-result-card .wr-label {
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.35rem;
+}
+
+.whatif-result-card .wr-value {
+    font-size: 1.05rem;
+    font-weight: 700;
+}
+
+.whatif-result-card .wr-diff {
+    font-size: 0.78rem;
+    margin-top: 0.25rem;
+    font-weight: 600;
+}
+
+.whatif-result-card .wr-diff.positive { color: var(--green); }
+.whatif-result-card .wr-diff.negative { color: var(--red); }
+
+.whatif-compare-btn {
+    display: block;
+    width: 100%;
+    margin-top: 1.5rem;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 0.75rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.whatif-compare-btn:hover {
+    opacity: 0.85;
+}
+
+/* ============================================================
+   FEATURE: Paycheck Calendar
+   ============================================================ */
+.paycheck-calendar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.75rem;
+}
+
+.cal-month {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.75rem;
+}
+
+.cal-month-name {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--accent-light);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.5rem;
+    text-align: center;
+}
+
+.cal-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+}
+
+.cal-day-header {
+    font-size: 0.55rem;
+    color: var(--text-dim);
+    text-align: center;
+    padding: 2px 0;
+    font-weight: 600;
+}
+
+.cal-day {
+    font-size: 0.6rem;
+    text-align: center;
+    padding: 3px 1px;
+    border-radius: 4px;
+    color: var(--text-dim);
+    min-height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.cal-day.empty {
+    visibility: hidden;
+}
+
+.cal-day.payday {
+    background: rgba(108, 92, 231, 0.25);
+    color: var(--accent-light);
+    font-weight: 700;
+    border: 1px solid rgba(108, 92, 231, 0.4);
+    cursor: default;
+    position: relative;
+}
+
+.cal-day.payday::after {
+    content: '$';
+    position: absolute;
+    top: -2px;
+    right: 0px;
+    font-size: 0.4rem;
+    color: var(--green);
+    font-weight: 700;
+}
+
+.cal-month-total {
+    font-size: 0.7rem;
+    text-align: center;
+    color: var(--green);
+    font-weight: 600;
+    margin-top: 0.5rem;
+    padding-top: 0.4rem;
+    border-top: 1px solid var(--border);
+}
+
+.cal-legend {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    flex-wrap: wrap;
+}
+
+.cal-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.cal-legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+    background: rgba(108, 92, 231, 0.25);
+    border: 1px solid rgba(108, 92, 231, 0.4);
+}
+
+.cal-summary {
+    margin-top: 1rem;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+}
+
+.cal-summary-stat {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.85rem;
+    text-align: center;
+}
+
+.cal-summary-stat .cs-label {
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.25rem;
+}
+
+.cal-summary-stat .cs-value {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text);
+}
+
+@media (max-width: 768px) {
+    .paycheck-calendar {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .cal-summary {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .paycheck-calendar {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ============================================================
+   FEATURE: Tax Refund Estimator
+   ============================================================ */
+.refund-estimator {
+    display: grid;
+    gap: 1rem;
+}
+
+.refund-summary {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+}
+
+.refund-stat {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem;
+    text-align: center;
+}
+
+.refund-stat .rs-label {
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.3rem;
+}
+
+.refund-stat .rs-value {
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+.refund-stat .rs-sub {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    margin-top: 0.2rem;
+}
+
+.refund-result {
+    padding: 1.25rem;
+    border-radius: 12px;
+    text-align: center;
+}
+
+.refund-result.refund {
+    background: rgba(0, 184, 148, 0.1);
+    border: 1px solid rgba(0, 184, 148, 0.3);
+}
+
+.refund-result.owed {
+    background: rgba(225, 112, 85, 0.1);
+    border: 1px solid rgba(225, 112, 85, 0.3);
+}
+
+.refund-result.balanced {
+    background: rgba(108, 92, 231, 0.1);
+    border: 1px solid rgba(108, 92, 231, 0.3);
+}
+
+.refund-result .rr-label {
+    font-size: 0.82rem;
+    color: var(--text-dim);
+    margin-bottom: 0.35rem;
+}
+
+.refund-result .rr-amount {
+    font-size: 1.8rem;
+    font-weight: 800;
+}
+
+.refund-result.refund .rr-amount { color: var(--green); }
+.refund-result.owed .rr-amount { color: var(--red); }
+.refund-result.balanced .rr-amount { color: var(--accent-light); }
+
+.refund-result .rr-context {
+    font-size: 0.82rem;
+    color: var(--text-dim);
+    margin-top: 0.5rem;
+    line-height: 1.5;
+}
+
+.refund-breakdown {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem;
+}
+
+.refund-breakdown h4 {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    margin-bottom: 0.75rem;
+}
+
+.refund-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.4rem 0;
+    font-size: 0.85rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.refund-row:last-child {
+    border-bottom: none;
+}
+
+.refund-row .rr-key {
+    color: var(--text-dim);
+}
+
+.refund-row .rr-val {
+    font-weight: 600;
+    color: var(--text);
+}
+
+.refund-w4-tip {
+    background: rgba(108, 92, 231, 0.1);
+    border: 1px solid rgba(108, 92, 231, 0.25);
+    border-radius: 10px;
+    padding: 1rem;
+    font-size: 0.82rem;
+    color: var(--text-dim);
+    line-height: 1.6;
+}
+
+.refund-w4-tip strong {
+    color: var(--text);
+}
+
+@media (max-width: 768px) {
+    .refund-summary {
+        grid-template-columns: 1fr;
+    }
+    .whatif-grid {
+        grid-template-columns: 1fr;
+    }
+    .whatif-diff-col {
+        flex-direction: row;
+        padding-top: 0;
+    }
+    .whatif-results {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ============================================================
+   FEATURE: Toast Notification
+   ============================================================ */
+.toast {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 0.75rem 1.5rem;
+    border-radius: 10px;
+    font-size: 0.88rem;
+    font-weight: 500;
+    z-index: 2000;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    opacity: 0;
+    transition: opacity 0.3s, transform 0.3s;
+    pointer-events: none;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
     </style>
 </head>
 <body>
@@ -715,8 +1659,32 @@
 <header>
     <h1>💰 Budget Builder</h1>
     <p>Paycheck planner with tax estimation, 401(k) front-loading & debt payoff</p>
-    <button id="helpBtn" onclick="toggleGuide();" style="position:absolute; top:1.5rem; right:1.5rem; background:rgba(255,255,255,0.2); border:1px solid rgba(255,255,255,0.4); color:white; padding:0.5rem 1rem; border-radius:8px; cursor:pointer; font-size:0.85rem; font-weight:600;">❓ How to Use</button>
+    <div class="toolbar">
+        <button class="theme-toggle" onclick="toggleTheme();" title="Toggle dark/light theme">
+            <span class="theme-icon" id="themeIcon">🌙</span>
+        </button>
+        <button class="toolbar-btn" onclick="togglePresetPanel();" title="Save/Load presets">💾 Presets</button>
+        <button class="toolbar-btn" onclick="copyShareLink();" title="Share via URL">🔗 Share</button>
+        <button class="toolbar-btn" onclick="openWhatIf();" title="What-if scenarios">🔀 What-If</button>
+        <button class="toolbar-btn" onclick="printBudget();" title="Print budget">🖨️ Print</button>
+        <button id="helpBtn" class="toolbar-btn" onclick="toggleGuide();">❓ How to Use</button>
+    </div>
 </header>
+<div class="preset-panel" id="presetPanel">
+    <div class="preset-panel-inner">
+        <h3>
+            <span>💾 Budget Presets</span>
+            <button class="preset-close" onclick="togglePresetPanel();" title="Close">✕</button>
+        </h3>
+        <div class="preset-save-row">
+            <input type="text" id="presetNameInput" placeholder="Enter a name for this preset..." />
+            <button onclick="savePresetFromUI();">Save Current</button>
+        </div>
+        <div class="preset-list" id="presetList">
+            <div class="preset-empty">No saved presets yet. Save your current budget above.</div>
+        </div>
+    </div>
+</div>
 
 <!-- Help Guide Overlay -->
 <div id="guideOverlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:1000; overflow-y:auto;" onclick="if(event.target===this)toggleGuide();">
@@ -972,6 +1940,18 @@
     <div class="card" id="cashflowCard" style="display:none;">
         <h2><span class="icon icon-summary">📊</span> Annual Cash Flow Analysis</h2>
         <div id="cashflowContent"></div>
+    </div>
+
+    <!-- Row 4.7: Paycheck Calendar -->
+    <div class="card" id="paycheckCalendarCard" style="display:none;">
+        <h2><span class="icon icon-income">📅</span> Paycheck Calendar</h2>
+        <div id="paycheckCalendarContent"></div>
+    </div>
+
+    <!-- Row 4.8: Tax Refund Estimator -->
+    <div class="card" id="taxRefundCard" style="display:none;">
+        <h2><span class="icon icon-tax">🧾</span> Tax Refund Estimator</h2>
+        <div id="taxRefundContent"></div>
     </div>
 
     <!-- Row 4.6: Debt Payoff Planner -->
@@ -3211,7 +4191,986 @@ function getUniqueName(wb, name) {
     while (existing.includes(name + ' (' + i + ')')) i++;
     return name + ' (' + i + ')';
 }
+
+// ============================================================
+// FEATURE: Dark/Light Theme Toggle
+// ============================================================
+function toggleTheme() {
+    document.body.classList.toggle('light');
+    const isLight = document.body.classList.contains('light');
+    localStorage.setItem('budget-theme', isLight ? 'light' : 'dark');
+    const icon = document.getElementById('themeIcon');
+    if (icon) icon.textContent = isLight ? '☀️' : '🌙';
+}
+
+function loadTheme() {
+    const saved = localStorage.getItem('budget-theme');
+    if (saved === 'light') {
+        document.body.classList.add('light');
+        const icon = document.getElementById('themeIcon');
+        if (icon) icon.textContent = '☀️';
+    }
+}
+
+// ============================================================
+// FEATURE: Input Validation
+// ============================================================
+function validateInput(el, min, max, fieldName) {
+    if (!el) return true;
+    const parent = el.closest('.form-group') || el.parentElement;
+
+    // Remove existing error state
+    el.classList.remove('input-error');
+    const existing = parent.querySelector('.error-tooltip');
+    if (existing) existing.remove();
+
+    let val;
+    if (el.type === 'number') {
+        val = parseFloat(el.value);
+    } else {
+        val = parseCurrency(el.value);
+    }
+
+    if (el.value === '' || el.value === undefined) return true; // empty is ok
+
+    let errorMsg = null;
+    if (isNaN(val)) {
+        errorMsg = `${fieldName} must be a number`;
+    } else if (val < min) {
+        errorMsg = `${fieldName} must be at least ${min}`;
+    } else if (val > max) {
+        errorMsg = `${fieldName} must be at most ${max.toLocaleString()}`;
+    }
+
+    if (errorMsg) {
+        el.classList.add('input-error');
+        const tooltip = document.createElement('div');
+        tooltip.className = 'error-tooltip';
+        tooltip.textContent = errorMsg;
+        parent.style.position = 'relative';
+        parent.appendChild(tooltip);
+        // Auto-remove tooltip after 4 seconds
+        setTimeout(() => {
+            tooltip.remove();
+        }, 4000);
+        return false;
+    }
+    return true;
+}
+
+function validateAllInputs() {
+    // Clear all existing validation errors first
+    document.querySelectorAll('.input-error').forEach(el => el.classList.remove('input-error'));
+    document.querySelectorAll('.error-tooltip').forEach(el => el.remove());
+
+    let allValid = true;
+
+    allValid = validateInput(document.getElementById('annualSalary'), 0, 10000000, 'Salary') && allValid;
+    allValid = validateInput(document.getElementById('contrib401k'), 0, 100, '401(k) %') && allValid;
+    allValid = validateInput(document.getElementById('employerMatch'), 0, 300, 'Employer Match %') && allValid;
+    allValid = validateInput(document.getElementById('afterTax401k'), 0, 100, 'After-Tax 401(k) %') && allValid;
+    allValid = validateInput(document.getElementById('espp'), 0, 15, 'ESPP %') && allValid;
+    allValid = validateInput(document.getElementById('hsaPerPaycheck'), 0, 50000, 'HSA') && allValid;
+    allValid = validateInput(document.getElementById('hsaEmployer'), 0, 50000, 'HSA Employer') && allValid;
+    allValid = validateInput(document.getElementById('w4Extra'), 0, 50000, 'W-4 Extra') && allValid;
+    allValid = validateInput(document.getElementById('addInsurance'), 0, 50000, 'AD&D Insurance') && allValid;
+    allValid = validateInput(document.getElementById('otherPreTax'), 0, 50000, 'Other Pre-Tax') && allValid;
+    allValid = validateInput(document.getElementById('legalPlan'), 0, 50000, 'Legal Plan') && allValid;
+    allValid = validateInput(document.getElementById('ltdOffset'), 0, 50000, 'LTD Offset') && allValid;
+
+    return allValid;
+}
+
+// Monkey-patch calculate to include validation
+const _originalCalculate = calculate;
+calculate = function() {
+    validateAllInputs();
+    _originalCalculate.apply(this, arguments);
+    // Render new feature sections after main calculation
+    renderPaycheckCalendar();
+    renderTaxRefundEstimator();
+};
+
+// ============================================================
+// FEATURE: Save/Load Presets
+// ============================================================
+function collectFormState() {
+    const state = {};
+
+    // Core form fields
+    state.annualSalary = document.getElementById('annualSalary').value;
+    state.filingStatus = document.getElementById('filingStatus').value;
+    state.state = document.getElementById('state').value;
+    state.payFrequency = document.getElementById('payFrequency').value;
+    state.w4Extra = document.getElementById('w4Extra').value;
+    state.contrib401k = document.getElementById('contrib401k').value;
+    state.employerMatch = document.getElementById('employerMatch').value;
+    state.afterTax401k = document.getElementById('afterTax401k').value;
+    state.espp = document.getElementById('espp').value;
+    state.hsaPerPaycheck = document.getElementById('hsaPerPaycheck').value;
+    state.hsaEmployer = document.getElementById('hsaEmployer').value;
+    state.addInsurance = document.getElementById('addInsurance').value;
+    state.otherPreTax = document.getElementById('otherPreTax').value;
+    state.legalPlan = document.getElementById('legalPlan').value;
+    state.ltdOffset = document.getElementById('ltdOffset').value;
+    state.taxYear = document.getElementById('taxYear').value;
+
+    // Budget items (bills, spending, savings)
+    state.budgetItems = {};
+    ['bills', 'spending', 'savings'].forEach(cat => {
+        const items = [];
+        const list = document.getElementById(cat + 'List');
+        if (list) {
+            list.querySelectorAll('.list-item').forEach(item => {
+                const inputs = item.querySelectorAll('input');
+                items.push({
+                    name: inputs[0] ? inputs[0].value : '',
+                    amount: inputs[1] ? inputs[1].value : ''
+                });
+            });
+        }
+        state.budgetItems[cat] = items;
+    });
+
+    // Debts
+    state.debts = [];
+    document.getElementById('debtList').querySelectorAll('.debt-item:not(#debt-header)').forEach(row => {
+        const inputs = row.querySelectorAll('input');
+        const selects = row.querySelectorAll('select');
+        state.debts.push({
+            name: inputs[0] ? inputs[0].value : '',
+            type: selects[0] ? selects[0].value : 'other',
+            balance: inputs[1] ? inputs[1].value : '',
+            apr: inputs[2] ? inputs[2].value : '',
+            minPay: inputs[3] ? inputs[3].value : '',
+            targetDate: inputs[4] ? inputs[4].value : ''
+        });
+    });
+
+    return state;
+}
+
+function applyFormState(state) {
+    if (!state) return;
+
+    // Set core form fields
+    const fields = ['annualSalary', 'filingStatus', 'state', 'payFrequency', 'w4Extra',
+        'contrib401k', 'employerMatch', 'afterTax401k', 'espp', 'hsaPerPaycheck',
+        'hsaEmployer', 'addInsurance', 'otherPreTax', 'legalPlan', 'ltdOffset', 'taxYear'];
+
+    fields.forEach(id => {
+        const el = document.getElementById(id);
+        if (el && state[id] !== undefined) {
+            el.value = state[id];
+        }
+    });
+
+    // Update year if taxYear was set
+    if (state.taxYear) {
+        selectedYear = parseInt(state.taxYear);
+        updateLimitsDisplay();
+    }
+
+    // Clear and recreate budget items
+    if (state.budgetItems) {
+        ['bills', 'spending', 'savings'].forEach(cat => {
+            const list = document.getElementById(cat + 'List');
+            if (list) list.innerHTML = '';
+            const items = state.budgetItems[cat] || [];
+            items.forEach(item => {
+                addItem(cat, item.name);
+                const listItems = list.querySelectorAll('.list-item');
+                const lastItem = listItems[listItems.length - 1];
+                if (lastItem) {
+                    const amountInput = lastItem.querySelectorAll('input')[1];
+                    if (amountInput) amountInput.value = item.amount;
+                }
+            });
+        });
+    }
+
+    // Clear and recreate debts
+    if (state.debts && state.debts.length > 0) {
+        const debtListEl = document.getElementById('debtList');
+        debtListEl.innerHTML = '';
+        debtCounter = 0;
+
+        state.debts.forEach(debt => {
+            addDebt();
+            const rows = debtListEl.querySelectorAll('.debt-item:not(#debt-header)');
+            const lastRow = rows[rows.length - 1];
+            if (lastRow) {
+                const inputs = lastRow.querySelectorAll('input');
+                const selects = lastRow.querySelectorAll('select');
+                if (inputs[0]) inputs[0].value = debt.name || '';
+                if (selects[0]) selects[0].value = debt.type || 'other';
+                if (inputs[1]) inputs[1].value = debt.balance || '';
+                if (inputs[2]) inputs[2].value = debt.apr || '';
+                if (inputs[3]) inputs[3].value = debt.minPay || '';
+                if (inputs[4]) inputs[4].value = debt.targetDate || '';
+            }
+        });
+    }
+
+    // Recalculate everything
+    calculate();
+}
+
+function savePreset(name) {
+    if (!name || !name.trim()) return;
+    name = name.trim();
+    const presetsRaw = localStorage.getItem('budget-presets');
+    const presets = presetsRaw ? JSON.parse(presetsRaw) : {};
+    presets[name] = {
+        state: collectFormState(),
+        savedAt: new Date().toISOString()
+    };
+    localStorage.setItem('budget-presets', JSON.stringify(presets));
+    renderPresetList();
+}
+
+function loadPreset(name) {
+    const presetsRaw = localStorage.getItem('budget-presets');
+    if (!presetsRaw) return;
+    const presets = JSON.parse(presetsRaw);
+    if (!presets[name]) return;
+    applyFormState(presets[name].state);
+    togglePresetPanel();
+    showToast(`Loaded preset "${name}"`);
+}
+
+function deletePreset(name) {
+    const presetsRaw = localStorage.getItem('budget-presets');
+    if (!presetsRaw) return;
+    const presets = JSON.parse(presetsRaw);
+    delete presets[name];
+    localStorage.setItem('budget-presets', JSON.stringify(presets));
+    renderPresetList();
+}
+
+function renderPresetList() {
+    const listEl = document.getElementById('presetList');
+    if (!listEl) return;
+
+    const presetsRaw = localStorage.getItem('budget-presets');
+    const presets = presetsRaw ? JSON.parse(presetsRaw) : {};
+    const names = Object.keys(presets).sort();
+
+    if (names.length === 0) {
+        listEl.innerHTML = '<div class="preset-empty">No saved presets yet. Save your current budget above.</div>';
+        return;
+    }
+
+    listEl.innerHTML = names.map(name => {
+        const savedAt = presets[name].savedAt ? new Date(presets[name].savedAt).toLocaleDateString() : '';
+        return `
+            <div class="preset-item">
+                <div>
+                    <span class="preset-item-name">${escapeHTML(name)}</span>
+                    <span class="preset-item-date">${savedAt}</span>
+                </div>
+                <div class="preset-item-actions">
+                    <button onclick="loadPreset('${escapeHTML(name.replace(/'/g, "\\'"))}');">Load</button>
+                    <button class="preset-delete" onclick="event.stopPropagation(); deletePreset('${escapeHTML(name.replace(/'/g, "\\'"))}');">Delete</button>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function escapeHTML(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+}
+
+function togglePresetPanel() {
+    const panel = document.getElementById('presetPanel');
+    if (panel) {
+        panel.classList.toggle('open');
+        if (panel.classList.contains('open')) {
+            renderPresetList();
+        }
+    }
+}
+
+function savePresetFromUI() {
+    const input = document.getElementById('presetNameInput');
+    if (!input || !input.value.trim()) {
+        input.focus();
+        input.classList.add('input-error');
+        setTimeout(() => input.classList.remove('input-error'), 1000);
+        return;
+    }
+    savePreset(input.value);
+    showToast(`Saved preset "${input.value.trim()}"`);
+    input.value = '';
+}
+
+// ============================================================
+// FEATURE: Share via URL
+// ============================================================
+function shareViaURL() {
+    try {
+        const state = collectFormState();
+        const json = JSON.stringify(state);
+        const encoded = btoa(unescape(encodeURIComponent(json)));
+        window.location.hash = encoded;
+        return window.location.href;
+    } catch (e) {
+        console.error('Error sharing via URL:', e);
+        return null;
+    }
+}
+
+function loadFromURL() {
+    try {
+        const hash = window.location.hash.slice(1);
+        if (!hash || hash.length < 10) return;
+        const json = decodeURIComponent(escape(atob(hash)));
+        const state = JSON.parse(json);
+        if (state && state.annualSalary !== undefined) {
+            applyFormState(state);
+            showToast('Loaded shared budget configuration');
+        }
+    } catch (e) {
+        // Invalid hash — silently ignore
+        console.log('No valid budget state in URL hash');
+    }
+}
+
+function copyShareLink() {
+    const url = shareViaURL();
+    if (!url) {
+        showToast('Error generating share link');
+        return;
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(url).then(() => {
+            showToast('Share link copied to clipboard!');
+        }).catch(() => {
+            fallbackCopyToClipboard(url);
+        });
+    } else {
+        fallbackCopyToClipboard(url);
+    }
+}
+
+function fallbackCopyToClipboard(text) {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.left = '-9999px';
+    document.body.appendChild(ta);
+    ta.select();
+    try {
+        document.execCommand('copy');
+        showToast('Share link copied to clipboard!');
+    } catch (e) {
+        showToast('URL updated — copy it from the address bar');
+    }
+    document.body.removeChild(ta);
+}
+
+// ============================================================
+// FEATURE: What-If Scenarios
+// ============================================================
+function openWhatIf() {
+    const modal = document.getElementById('whatIfModal');
+    if (!modal) return;
+
+    // Populate Scenario B state dropdown
+    const stateSelectB = document.getElementById('wifStateB');
+    if (stateSelectB && stateSelectB.options.length === 0) {
+        const sorted = Object.entries(STATE_TAXES).sort((a, b) => a[1].name.localeCompare(b[1].name));
+        sorted.forEach(([code, info]) => {
+            const opt = document.createElement('option');
+            opt.value = code;
+            opt.textContent = `${info.name}${info.rate === 0 ? ' (no tax)' : ''}`;
+            stateSelectB.appendChild(opt);
+        });
+    }
+
+    // Fill Scenario A with current values
+    const salary = document.getElementById('annualSalary').value;
+    const filing = document.getElementById('filingStatus').value;
+    const state = document.getElementById('state').value;
+    const contrib = document.getElementById('contrib401k').value || '0';
+    const afterTax = document.getElementById('afterTax401k').value || '0';
+    const hsa = document.getElementById('hsaPerPaycheck').value || '0';
+    const espp = document.getElementById('espp').value || '0';
+
+    document.getElementById('wifSalaryA').value = salary;
+    document.getElementById('wif401kA').value = contrib + '%';
+    document.getElementById('wifAfterTaxA').value = afterTax + '%';
+    const filingLabels = { single: 'Single', married_jointly: 'Married Jointly', married_separately: 'Married Separately', head_of_household: 'Head of Household' };
+    document.getElementById('wifFilingA').value = filingLabels[filing] || filing;
+    document.getElementById('wifStateA').value = STATE_TAXES[state]?.name || state;
+    document.getElementById('wifHsaA').value = hsa;
+    document.getElementById('wifEsppA').value = espp + '%';
+
+    // Pre-fill Scenario B with same values for easy editing
+    document.getElementById('wifSalaryB').value = salary;
+    document.getElementById('wif401kB').value = contrib;
+    document.getElementById('wifAfterTaxB').value = afterTax;
+    document.getElementById('wifFilingB').value = filing;
+    document.getElementById('wifStateB').value = state;
+    document.getElementById('wifHsaB').value = hsa;
+    document.getElementById('wifEsppB').value = espp;
+
+    // Clear previous results
+    document.getElementById('whatIfResults').innerHTML = '';
+
+    modal.classList.add('open');
+}
+
+function closeWhatIf() {
+    const modal = document.getElementById('whatIfModal');
+    if (modal) modal.classList.remove('open');
+}
+
+function computeScenarioResults(salary, contrib401kPct, afterTax401kPct, filingStatus, stateCode, hsaPP, esppPct) {
+    const paychecks = getPaychecks();
+    const gross = salary / paychecks;
+    const limits = getLimits();
+
+    const emp401k = gross * (contrib401kPct / 100);
+    const matchPct = parseFloat(document.getElementById('employerMatch').value) || 0;
+    const matchAmt = emp401k * (matchPct / 100);
+    const afterTax = gross * (afterTax401kPct / 100);
+    const esppAmt = gross * (esppPct / 100);
+    const addIns = parseCurrency(document.getElementById('addInsurance').value);
+    const otherPre = parseCurrency(document.getElementById('otherPreTax').value);
+    const legal = parseCurrency(document.getElementById('legalPlan').value);
+    const ltd = parseCurrency(document.getElementById('ltdOffset').value);
+    const w4Extra = parseCurrency(document.getElementById('w4Extra').value);
+
+    const preTaxPP = emp401k + hsaPP + addIns + otherPre;
+    const preTaxAnnual = preTaxPP * paychecks;
+    const stdDed = STANDARD_DEDUCTION[filingStatus];
+
+    const fedTax = calcFederalTax(Math.max(0, salary - preTaxAnnual - stdDed), filingStatus);
+    const ficaW = Math.max(0, salary - hsaPP * paychecks);
+    const fica = calcFICA(ficaW, limits.ssWageBase);
+    const stateTax = calcStateTax(Math.max(0, salary - preTaxAnnual), stateCode);
+    const waCares = (STATE_TAXES[stateCode]?.waCares || 0) * salary;
+
+    const totalTaxAnnual = fedTax + fica.total + stateTax + waCares + (w4Extra * paychecks);
+    const totalTaxPP = totalTaxAnnual / paychecks;
+
+    // Simulate annual take-home with 401k caps
+    let empCum = 0, matchCum = 0, atCum = 0, annualTH = 0;
+    for (let i = 1; i <= paychecks; i++) {
+        let e = emp401k;
+        if (empCum + e > limits.emp401k) e = Math.max(0, limits.emp401k - empCum);
+        empCum += e;
+        const m = e > 0 ? matchAmt : 0;
+        matchCum += m;
+        const sp = limits.total401k - empCum - matchCum - atCum;
+        let at = Math.min(afterTax, Math.max(0, sp));
+        atCum += at;
+        annualTH += gross - (e + hsaPP + addIns + otherPre) - totalTaxPP - (at + esppAmt + legal + ltd);
+    }
+
+    const totalSavings = empCum + matchCum + atCum + (hsaPP * paychecks) + (esppAmt * paychecks);
+
+    return {
+        annualTakeHome: annualTH,
+        takeHomePP: annualTH / paychecks,
+        totalTaxAnnual: totalTaxAnnual,
+        totalTaxPP: totalTaxPP,
+        totalSavings: totalSavings,
+        effectiveRate: salary > 0 ? (totalTaxAnnual / salary * 100) : 0
+    };
+}
+
+function runWhatIfComparison() {
+    // Scenario A: current values
+    const salaryA = parseCurrency(document.getElementById('annualSalary').value);
+    const contribA = parseFloat(document.getElementById('contrib401k').value) || 0;
+    const afterTaxA = parseFloat(document.getElementById('afterTax401k').value) || 0;
+    const filingA = document.getElementById('filingStatus').value;
+    const stateA = document.getElementById('state').value;
+    const hsaA = parseCurrency(document.getElementById('hsaPerPaycheck').value);
+    const esppA = parseFloat(document.getElementById('espp').value) || 0;
+
+    // Scenario B: from modal
+    const salaryB = parseCurrency(document.getElementById('wifSalaryB').value);
+    const contribB = parseFloat(document.getElementById('wif401kB').value) || 0;
+    const afterTaxB = parseFloat(document.getElementById('wifAfterTaxB').value) || 0;
+    const filingB = document.getElementById('wifFilingB').value;
+    const stateB = document.getElementById('wifStateB').value;
+    const hsaB = parseCurrency(document.getElementById('wifHsaB').value);
+    const esppB = parseFloat(document.getElementById('wifEsppB').value) || 0;
+
+    const a = computeScenarioResults(salaryA, contribA, afterTaxA, filingA, stateA, hsaA, esppA);
+    const b = computeScenarioResults(salaryB, contribB, afterTaxB, filingB, stateB, hsaB, esppB);
+
+    function diffClass(val) { return val > 0 ? 'positive' : val < 0 ? 'negative' : ''; }
+    function diffStr(val) { return val > 0 ? '+' + fmt(val) : val < 0 ? fmt(val) : '—'; }
+    function diffPctStr(val) { return val > 0 ? '+' + val.toFixed(1) + '%' : val < 0 ? val.toFixed(1) + '%' : '—'; }
+
+    const thDiff = b.annualTakeHome - a.annualTakeHome;
+    const taxDiff = b.totalTaxAnnual - a.totalTaxAnnual;
+    const savDiff = b.totalSavings - a.totalSavings;
+    const rateDiff = b.effectiveRate - a.effectiveRate;
+    const ppDiff = b.takeHomePP - a.takeHomePP;
+
+    document.getElementById('whatIfResults').innerHTML = `
+        <div class="whatif-results">
+            <div class="whatif-result-card">
+                <div class="wr-label">Annual Take-Home</div>
+                <div class="wr-value" style="color: var(--accent-light);">
+                    ${fmt(a.annualTakeHome)} → ${fmt(b.annualTakeHome)}
+                </div>
+                <div class="wr-diff ${diffClass(thDiff)}">${diffStr(thDiff)}/year</div>
+            </div>
+            <div class="whatif-result-card">
+                <div class="wr-label">Take-Home Per Paycheck</div>
+                <div class="wr-value" style="color: var(--text);">
+                    ${fmt(a.takeHomePP)} → ${fmt(b.takeHomePP)}
+                </div>
+                <div class="wr-diff ${diffClass(ppDiff)}">${diffStr(ppDiff)}/paycheck</div>
+            </div>
+            <div class="whatif-result-card">
+                <div class="wr-label">Total Annual Taxes</div>
+                <div class="wr-value" style="color: var(--red);">
+                    ${fmt(a.totalTaxAnnual)} → ${fmt(b.totalTaxAnnual)}
+                </div>
+                <div class="wr-diff ${diffClass(-taxDiff)}">${diffStr(taxDiff)}/year</div>
+            </div>
+            <div class="whatif-result-card">
+                <div class="wr-label">Effective Tax Rate</div>
+                <div class="wr-value" style="color: var(--orange);">
+                    ${a.effectiveRate.toFixed(1)}% → ${b.effectiveRate.toFixed(1)}%
+                </div>
+                <div class="wr-diff ${diffClass(-rateDiff)}">${diffPctStr(rateDiff)}</div>
+            </div>
+            <div class="whatif-result-card">
+                <div class="wr-label">Total Retirement + Savings</div>
+                <div class="wr-value" style="color: var(--green);">
+                    ${fmt(a.totalSavings)} → ${fmt(b.totalSavings)}
+                </div>
+                <div class="wr-diff ${diffClass(savDiff)}">${diffStr(savDiff)}/year</div>
+            </div>
+            <div class="whatif-result-card">
+                <div class="wr-label">Monthly Take-Home</div>
+                <div class="wr-value" style="color: var(--blue);">
+                    ${fmt(a.annualTakeHome / 12)} → ${fmt(b.annualTakeHome / 12)}
+                </div>
+                <div class="wr-diff ${diffClass(thDiff / 12)}">${diffStr(thDiff / 12)}/month</div>
+            </div>
+        </div>
+    `;
+}
+
+// ============================================================
+// FEATURE: Print-Friendly View
+// ============================================================
+function printBudget() {
+    window.print();
+}
+
+// ============================================================
+// FEATURE: Paycheck Calendar
+// ============================================================
+function renderPaycheckCalendar() {
+    const card = document.getElementById('paycheckCalendarCard');
+    const content = document.getElementById('paycheckCalendarContent');
+    if (!card || !content) return;
+
+    const salary = parseCurrency(document.getElementById('annualSalary').value);
+    if (salary <= 0) {
+        card.style.display = 'none';
+        return;
+    }
+    card.style.display = '';
+
+    const paychecks = getPaychecks();
+    const freq = parseInt(document.getElementById('payFrequency').value);
+    const year = new Date().getFullYear();
+    const takeHomePP = parseCurrency(document.getElementById('takeHomeAmount')?.textContent || '0');
+
+    // Generate all paycheck dates for the year
+    const paycheckDates = [];
+
+    if (freq === 24) {
+        // Semi-monthly: 1st and 15th of each month
+        for (let m = 0; m < 12; m++) {
+            paycheckDates.push(new Date(year, m, 1));
+            paycheckDates.push(new Date(year, m, 15));
+        }
+    } else if (freq === 12) {
+        // Monthly: 1st of each month
+        for (let m = 0; m < 12; m++) {
+            paycheckDates.push(new Date(year, m, 1));
+        }
+    } else if (freq === 26) {
+        // Biweekly: every other Friday starting first Friday of year
+        let d = new Date(year, 0, 1);
+        while (d.getDay() !== 5) d.setDate(d.getDate() + 1); // Find first Friday
+        while (d.getFullYear() === year) {
+            paycheckDates.push(new Date(d));
+            d.setDate(d.getDate() + 14);
+        }
+    } else if (freq === 52) {
+        // Weekly: every Friday
+        let d = new Date(year, 0, 1);
+        while (d.getDay() !== 5) d.setDate(d.getDate() + 1); // Find first Friday
+        while (d.getFullYear() === year) {
+            paycheckDates.push(new Date(d));
+            d.setDate(d.getDate() + 7);
+        }
+    }
+
+    // Build a set of payday keys for fast lookup: "M-D"
+    const paydaySet = new Set();
+    paycheckDates.forEach(d => {
+        paydaySet.add(d.getMonth() + '-' + d.getDate());
+    });
+
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'];
+    const dayHeaders = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+    const freqLabels = { 52: 'Weekly (every Friday)', 26: 'Biweekly (every other Friday)', 24: 'Semi-monthly (1st & 15th)', 12: 'Monthly (1st)' };
+
+    let calHTML = `
+        <div class="cal-legend">
+            <div class="cal-legend-item"><div class="cal-legend-dot"></div> Payday</div>
+            <div class="cal-legend-item" style="color: var(--text-dim);">📆 ${freqLabels[freq] || freq + ' paychecks'} · ${paycheckDates.length} paychecks in ${year}</div>
+        </div>
+        <div class="paycheck-calendar">
+    `;
+
+    let annualTotal = 0;
+
+    for (let m = 0; m < 12; m++) {
+        const firstDay = new Date(year, m, 1).getDay();
+        const daysInMonth = new Date(year, m + 1, 0).getDate();
+        let monthPaydays = 0;
+
+        let monthHTML = `<div class="cal-month"><div class="cal-month-name">${monthNames[m]}</div><div class="cal-days">`;
+
+        // Day headers
+        dayHeaders.forEach(dh => {
+            monthHTML += `<div class="cal-day-header">${dh}</div>`;
+        });
+
+        // Empty cells for offset
+        for (let i = 0; i < firstDay; i++) {
+            monthHTML += '<div class="cal-day empty"></div>';
+        }
+
+        // Day cells
+        for (let d = 1; d <= daysInMonth; d++) {
+            const isPayday = paydaySet.has(m + '-' + d);
+            if (isPayday) monthPaydays++;
+            monthHTML += `<div class="cal-day${isPayday ? ' payday' : ''}" ${isPayday ? 'title="Payday: ' + fmt(takeHomePP) + '"' : ''}>${d}</div>`;
+        }
+
+        const monthTotal = monthPaydays * takeHomePP;
+        annualTotal += monthTotal;
+
+        monthHTML += `</div><div class="cal-month-total">${monthPaydays} check${monthPaydays !== 1 ? 's' : ''} · ${fmt(monthTotal)}</div></div>`;
+        calHTML += monthHTML;
+    }
+
+    calHTML += '</div>';
+
+    // Summary stats
+    calHTML += `
+        <div class="cal-summary">
+            <div class="cal-summary-stat">
+                <div class="cs-label">Total Paychecks</div>
+                <div class="cs-value">${paycheckDates.length}</div>
+            </div>
+            <div class="cal-summary-stat">
+                <div class="cs-label">Per Paycheck</div>
+                <div class="cs-value" style="color: var(--green);">${fmt(takeHomePP)}</div>
+            </div>
+            <div class="cal-summary-stat">
+                <div class="cs-label">Annual Take-Home</div>
+                <div class="cs-value" style="color: var(--accent-light);">${fmt(annualTotal)}</div>
+            </div>
+        </div>
+    `;
+
+    content.innerHTML = calHTML;
+}
+
+// ============================================================
+// FEATURE: Tax Refund Estimator
+// ============================================================
+function renderTaxRefundEstimator() {
+    const card = document.getElementById('taxRefundCard');
+    const content = document.getElementById('taxRefundContent');
+    if (!card || !content) return;
+
+    const salary = parseCurrency(document.getElementById('annualSalary').value);
+    if (salary <= 0) {
+        card.style.display = 'none';
+        return;
+    }
+    card.style.display = '';
+
+    const paychecks = getPaychecks();
+    const filingStatus = document.getElementById('filingStatus').value;
+    const stateCode = document.getElementById('state').value;
+    const limits = getLimits();
+    const w4Extra = parseCurrency(document.getElementById('w4Extra').value);
+
+    // Pre-tax deductions
+    const emp401kPct = parseFloat(document.getElementById('contrib401k').value) || 0;
+    const gross = salary / paychecks;
+    const emp401k = gross * (emp401kPct / 100);
+    const hsaPP = parseCurrency(document.getElementById('hsaPerPaycheck').value);
+    const addIns = parseCurrency(document.getElementById('addInsurance').value);
+    const otherPre = parseCurrency(document.getElementById('otherPreTax').value);
+
+    const preTaxPP = emp401k + hsaPP + addIns + otherPre;
+    const preTaxAnnual = preTaxPP * paychecks;
+    const stdDed = STANDARD_DEDUCTION[filingStatus];
+
+    // Actual tax liability (what you truly owe)
+    const federalTaxableIncome = Math.max(0, salary - preTaxAnnual - stdDed);
+    const actualFederalTax = calcFederalTax(federalTaxableIncome, filingStatus);
+
+    const ficaWages = Math.max(0, salary - hsaPP * paychecks);
+    const fica = calcFICA(ficaWages, limits.ssWageBase);
+
+    const stateTaxableIncome = Math.max(0, salary - preTaxAnnual);
+    const actualStateTax = calcStateTax(stateTaxableIncome, stateCode);
+
+    const waCaresPct = STATE_TAXES[stateCode]?.waCares || 0;
+    const actualWaCares = salary * waCaresPct;
+
+    const actualTotalLiability = actualFederalTax + fica.total + actualStateTax + actualWaCares;
+
+    // Estimated withholding (what your employer takes out, including W-4 extra)
+    const annualW4Extra = w4Extra * paychecks;
+    const estimatedWithholding = actualTotalLiability + annualW4Extra;
+
+    // The difference (positive = refund, negative = owed)
+    // In reality, withholding should approximate liability; W-4 extra is the delta
+    const difference = estimatedWithholding - actualTotalLiability;
+
+    // Determine result type
+    let resultClass, resultEmoji, resultLabel;
+    if (difference > 50) {
+        resultClass = 'refund';
+        resultEmoji = '🎉';
+        resultLabel = 'Estimated Refund';
+    } else if (difference < -50) {
+        resultClass = 'owed';
+        resultEmoji = '⚠️';
+        resultLabel = 'Estimated Amount Owed';
+    } else {
+        resultClass = 'balanced';
+        resultEmoji = '✅';
+        resultLabel = 'Roughly Balanced';
+    }
+
+    // Effective tax rate
+    const effectiveRate = salary > 0 ? (actualTotalLiability / salary * 100) : 0;
+
+    // Marginal rate
+    const brackets = FEDERAL_BRACKETS[filingStatus];
+    let marginalRate = 0;
+    for (const b of brackets) {
+        if (federalTaxableIncome > b.min) marginalRate = b.rate * 100;
+    }
+
+    content.innerHTML = `
+        <div class="refund-estimator">
+            <div class="refund-summary">
+                <div class="refund-stat">
+                    <div class="rs-label">Total Annual Withholding</div>
+                    <div class="rs-value" style="color: var(--red);">${fmt(estimatedWithholding)}</div>
+                    <div class="rs-sub">Taxes + W-4 extra withheld</div>
+                </div>
+                <div class="refund-stat">
+                    <div class="rs-label">Actual Tax Liability</div>
+                    <div class="rs-value" style="color: var(--orange);">${fmt(actualTotalLiability)}</div>
+                    <div class="rs-sub">What you actually owe</div>
+                </div>
+                <div class="refund-stat">
+                    <div class="rs-label">Effective Tax Rate</div>
+                    <div class="rs-value" style="color: var(--text);">${effectiveRate.toFixed(1)}%</div>
+                    <div class="rs-sub">Marginal bracket: ${marginalRate.toFixed(0)}%</div>
+                </div>
+            </div>
+
+            <div class="refund-result ${resultClass}">
+                <div class="rr-label">${resultEmoji} ${resultLabel}</div>
+                <div class="rr-amount">${fmt(Math.abs(difference))}</div>
+                <div class="rr-context">
+                    ${difference > 50 ?
+                        'Your W-4 extra withholding of ' + fmt(w4Extra) + '/paycheck (' + fmt(annualW4Extra) + '/year) results in overwithholding. You may receive this back as a tax refund.' :
+                    difference < -50 ?
+                        'Your current withholding may not cover your full tax liability. Consider increasing W-4 extra withholding by ~' + fmt(Math.abs(difference) / paychecks) + '/paycheck.' :
+                        'Your withholding closely matches your estimated tax liability. No significant refund or payment expected.'}
+                </div>
+            </div>
+
+            <div class="refund-breakdown">
+                <h4>📋 Tax Liability Breakdown</h4>
+                <div class="refund-row">
+                    <span class="rr-key">Federal Income Tax</span>
+                    <span class="rr-val">${fmt(actualFederalTax)}</span>
+                </div>
+                <div class="refund-row">
+                    <span class="rr-key">Social Security (6.2%)</span>
+                    <span class="rr-val">${fmt(fica.ss)}</span>
+                </div>
+                <div class="refund-row">
+                    <span class="rr-key">Medicare (1.45%${ficaWages > 200000 ? ' + 0.9% additional' : ''})</span>
+                    <span class="rr-val">${fmt(fica.medicare)}</span>
+                </div>
+                ${actualStateTax > 0 ? `<div class="refund-row">
+                    <span class="rr-key">State Tax (${STATE_TAXES[stateCode]?.name || stateCode})</span>
+                    <span class="rr-val">${fmt(actualStateTax)}</span>
+                </div>` : ''}
+                ${actualWaCares > 0 ? `<div class="refund-row">
+                    <span class="rr-key">WA Cares Fund</span>
+                    <span class="rr-val">${fmt(actualWaCares)}</span>
+                </div>` : ''}
+                <div class="refund-row" style="border-top: 2px solid var(--border); padding-top: 0.6rem; margin-top: 0.2rem;">
+                    <span class="rr-key" style="font-weight: 700; color: var(--text);">Total Liability</span>
+                    <span class="rr-val" style="font-size: 1rem;">${fmt(actualTotalLiability)}</span>
+                </div>
+                <div class="refund-row">
+                    <span class="rr-key">W-4 Extra Withholding (annual)</span>
+                    <span class="rr-val" style="color: var(--accent-light);">${w4Extra > 0 ? '+' + fmt(annualW4Extra) : '$0.00'}</span>
+                </div>
+            </div>
+
+            <div class="refund-w4-tip">
+                💡 <strong>W-4 Adjustment Tips:</strong><br>
+                ${w4Extra > 0 ?
+                    '• You\'re currently withholding an extra <strong>' + fmt(w4Extra) + '/paycheck</strong> (' + fmt(annualW4Extra) + '/year) via W-4 Line 4(c).<br>' +
+                    '• If you want a smaller refund and larger paychecks, consider reducing your extra withholding.<br>' +
+                    '• To target a $0 refund, set W-4 extra to <strong>$0</strong> (your base withholding already approximates your liability).' :
+                    '• You have no extra W-4 withholding. Your base paycheck withholding should approximate your tax liability.<br>' +
+                    '• If you have additional income (RSUs, freelance, investments), consider adding W-4 extra withholding to avoid an underpayment penalty.<br>' +
+                    '• A common strategy: add extra withholding to match expected RSU/bonus tax, typically 22-37% of supplemental income.'}
+            </div>
+        </div>
+    `;
+}
+
+// ============================================================
+// FEATURE: Toast Notification Helper
+// ============================================================
+function showToast(message, duration) {
+    duration = duration || 3000;
+    const toast = document.getElementById('toast');
+    if (!toast) return;
+    toast.textContent = message;
+    toast.classList.add('show');
+    setTimeout(() => {
+        toast.classList.remove('show');
+    }, duration);
+}
+
+// ============================================================
+// FEATURE: Init Additions
+// ============================================================
+loadTheme();
+loadFromURL();
+renderPresetList();
+
 </script>
+
+
+<div id="whatIfModal" onclick="if(event.target===this)closeWhatIf();">
+    <div class="whatif-container">
+        <button class="whatif-close" onclick="closeWhatIf();">✕</button>
+        <h2>🔀 What-If Scenario Comparison</h2>
+        <p style="font-size: 0.85rem; color: var(--text-dim); margin-bottom: 1.5rem;">
+            Compare your current budget against a hypothetical scenario. Edit Scenario B and click Compare.
+        </p>
+        <div class="whatif-grid">
+            <div class="whatif-column scenario-a">
+                <h3>📌 Scenario A (Current)</h3>
+                <div class="whatif-field">
+                    <label>Annual Salary</label>
+                    <input type="text" id="wifSalaryA" readonly style="opacity:0.7;">
+                </div>
+                <div class="whatif-field">
+                    <label>401(k) Employee %</label>
+                    <input type="text" id="wif401kA" readonly style="opacity:0.7;">
+                </div>
+                <div class="whatif-field">
+                    <label>After-Tax 401(k) %</label>
+                    <input type="text" id="wifAfterTaxA" readonly style="opacity:0.7;">
+                </div>
+                <div class="whatif-field">
+                    <label>Filing Status</label>
+                    <input type="text" id="wifFilingA" readonly style="opacity:0.7;">
+                </div>
+                <div class="whatif-field">
+                    <label>State</label>
+                    <input type="text" id="wifStateA" readonly style="opacity:0.7;">
+                </div>
+                <div class="whatif-field">
+                    <label>HSA Per Paycheck</label>
+                    <input type="text" id="wifHsaA" readonly style="opacity:0.7;">
+                </div>
+                <div class="whatif-field">
+                    <label>ESPP %</label>
+                    <input type="text" id="wifEsppA" readonly style="opacity:0.7;">
+                </div>
+            </div>
+            <div class="whatif-diff-col">
+                <span class="diff-arrow">⟷</span>
+                <span>vs</span>
+            </div>
+            <div class="whatif-column scenario-b">
+                <h3>🧪 Scenario B (What-If)</h3>
+                <div class="whatif-field">
+                    <label>Annual Salary</label>
+                    <input type="text" id="wifSalaryB" placeholder="e.g. 120,000" oninput="handleCurrencyInput(this);">
+                </div>
+                <div class="whatif-field">
+                    <label>401(k) Employee %</label>
+                    <input type="number" id="wif401kB" placeholder="6" min="0" max="100" step="0.5">
+                </div>
+                <div class="whatif-field">
+                    <label>After-Tax 401(k) %</label>
+                    <input type="number" id="wifAfterTaxB" placeholder="0" min="0" max="100" step="0.5">
+                </div>
+                <div class="whatif-field">
+                    <label>Filing Status</label>
+                    <select id="wifFilingB">
+                        <option value="single">Single</option>
+                        <option value="married_jointly">Married Filing Jointly</option>
+                        <option value="married_separately">Married Filing Separately</option>
+                        <option value="head_of_household">Head of Household</option>
+                    </select>
+                </div>
+                <div class="whatif-field">
+                    <label>State</label>
+                    <select id="wifStateB"></select>
+                </div>
+                <div class="whatif-field">
+                    <label>HSA Per Paycheck</label>
+                    <input type="text" id="wifHsaB" placeholder="0" oninput="handleCurrencyInput(this);">
+                </div>
+                <div class="whatif-field">
+                    <label>ESPP %</label>
+                    <input type="number" id="wifEsppB" placeholder="0" min="0" max="15" step="0.5">
+                </div>
+            </div>
+        </div>
+        <button class="whatif-compare-btn" onclick="runWhatIfComparison();">⚡ Compare Scenarios</button>
+        <div id="whatIfResults"></div>
+    </div>
+</div>
+
+<!-- ============================================================
+     FEATURE: Toast Container (insert before </body>)
+     ============================================================ -->
+<div class="toast" id="toast"></div>
 
 </body>
 </html>
