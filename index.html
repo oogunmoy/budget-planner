@@ -686,7 +686,7 @@
 
 <header>
     <h1>💰 Budget Builder</h1>
-    <p>Semi-monthly paycheck planner with tax estimation, 401(k) front-loading & debt payoff</p>
+    <p>Paycheck planner with tax estimation, 401(k) front-loading & debt payoff</p>
     <button onclick="toggleGuide();" style="position:absolute; top:1.5rem; right:1.5rem; background:rgba(255,255,255,0.2); border:1px solid rgba(255,255,255,0.4); color:white; padding:0.5rem 1rem; border-radius:8px; cursor:pointer; font-size:0.85rem; font-weight:600;">❓ How to Use</button>
 </header>
 
@@ -698,7 +698,7 @@
 
         <div style="font-size:0.9rem; line-height:1.8; color:var(--text);">
             <h3 style="color:var(--accent-light); margin:1rem 0 0.5rem;">Step 1: Enter Your Income</h3>
-            <p>Enter your <strong>annual salary</strong>, select your <strong>filing status</strong> and <strong>state</strong>. The tool calculates your gross pay per paycheck (salary ÷ 24).</p>
+            <p>Enter your <strong>annual salary</strong>, select your <strong>filing status</strong> and <strong>state</strong>. The tool calculates your gross pay per paycheck (salary ÷ number of paychecks).</p>
             <p>If your paycheck withholds extra federal tax (for RSUs, bonuses, etc.), enter that in <strong>W-4 Extra Withholding</strong>.</p>
 
             <h3 style="color:var(--accent-light); margin:1rem 0 0.5rem;">Step 2: Set Your IRS Limits</h3>
@@ -792,11 +792,17 @@
             </div>
             <div class="form-row">
                 <div class="form-group">
+                    <label>Pay Frequency</label>
+                    <select id="payFrequency" onchange="calculate();">
+                        <option value="52">Weekly (52 paychecks)</option>
+                        <option value="26">Biweekly (26 paychecks)</option>
+                        <option value="24" selected>Semi-monthly (24 paychecks)</option>
+                        <option value="12">Monthly (12 paychecks)</option>
+                    </select>
+                </div>
+                <div class="form-group">
                     <label style="font-size:0.75rem;">W-4 Extra Withholding (per paycheck)</label>
                     <input type="text" id="w4Extra" placeholder="0" oninput="handleCurrencyInput(this); calculate();">
-                </div>
-                <div class="form-group" style="display:flex; align-items:flex-end;">
-                    <span style="font-size:0.78rem; color: var(--text-dim); padding-bottom: 0.65rem;">Semi-monthly · 24 paychecks/year</span>
                 </div>
             </div>
             <button class="limits-toggle" onclick="toggleLimits();">
@@ -1175,6 +1181,10 @@ function toggleGuide() {
     overlay.style.display = overlay.style.display === 'none' ? '' : 'none';
 }
 
+function getPaychecks() {
+    return parseInt(document.getElementById('payFrequency').value) || 24;
+}
+
 // ============================================================
 // Initialization
 // ============================================================
@@ -1310,7 +1320,7 @@ function calculate() {
     const ltdOffset = parseCurrency(document.getElementById('ltdOffset').value);
 
     const limits = getLimits();
-    const paychecks = 24;
+    const paychecks = getPaychecks();
     const grossPerPaycheck = annualSalary / paychecks;
 
     // --- Pre-tax deductions (reduce federal/state taxable income) ---
@@ -1517,7 +1527,7 @@ function renderCashFlow(grossPP, empPP, matchPP, afterTaxPP, esppPP, hsaPP, addI
     }
     card.style.display = '';
 
-    const paychecks = 24;
+    const paychecks = getPaychecks();
     const LIMIT_EMP = limits.emp401k;
     const LIMIT_TOTAL = limits.total401k;
 
@@ -1607,7 +1617,7 @@ function renderCashFlow(grossPP, empPP, matchPP, afterTaxPP, esppPP, hsaPP, addI
         <div class="cf-annual-card">
             <div class="cf-label">Annual Take-Home (Blended)</div>
             <div class="cf-big">${fmt(annualTakeHome)}</div>
-            <div class="cf-sub">Monthly budget allowance: <strong>${fmt(monthlyBudgetAllowance)}</strong>/mo · ${fmt(annualTakeHome / 24)}/paycheck average</div>
+            <div class="cf-sub">Monthly budget allowance: <strong>${fmt(monthlyBudgetAllowance)}</strong>/mo · ${fmt(annualTakeHome / paychecks)}/paycheck average</div>
         </div>
 
         <div class="cashflow-phases">
@@ -1772,7 +1782,7 @@ function render401kFrontload(data, grossPP, taxPP, hsaPP, addInsPP, otherPP, aft
     }
     card.style.display = '';
 
-    const paychecks = 24;
+    const paychecks = getPaychecks();
 
     // Phase 1: During front-loading
     const phase1_401k = data.empPerPaycheck;
@@ -2035,6 +2045,7 @@ function renderHsaTracker(hsaPerPaycheck, hsaEmployerAnnual, paychecks, limits) 
 // 401(k) Max-Out Projection
 // ============================================================
 function renderProjection(empPct, afterTaxPct, matchPct, limits) {
+    const paychecks = getPaychecks();
     const card = document.getElementById('projectionCard');
     const content = document.getElementById('projectionContent');
 
@@ -2050,7 +2061,7 @@ function renderProjection(empPct, afterTaxPct, matchPct, limits) {
 
     // For each target paycheck count, calculate:
     // Employee pre-tax max: salary needed so empPct% * (salary/24) * targetChecks >= LIMIT_EMP
-    // → salary >= LIMIT_EMP * 24 / (empPct/100 * targetChecks)
+    // → salary >= LIMIT_EMP * paychecks / (empPct/100 * targetChecks)
     //
     // Total 415(c) max: need emp + match + afterTax to hit LIMIT_TOTAL in targetChecks
     // emp contribution = min(empPct% * grossPP * checks, LIMIT_EMP)
@@ -2062,8 +2073,8 @@ function renderProjection(empPct, afterTaxPct, matchPct, limits) {
     let rows = '';
     for (const t of targets) {
         // Salary to max employee pre-tax in t paychecks
-        const salaryForEmp = (LIMIT_EMP * 24) / (empPct / 100 * t);
-        const grossPP_emp = salaryForEmp / 24;
+        const salaryForEmp = (LIMIT_EMP * paychecks) / (empPct / 100 * t);
+        const grossPP_emp = salaryForEmp / paychecks;
         const empPerCheck_emp = grossPP_emp * (empPct / 100);
 
         // At that salary, what's the total 415(c)?
@@ -2086,7 +2097,7 @@ function renderProjection(empPct, afterTaxPct, matchPct, limits) {
             //   afterTaxPct/100 * S/24 * t >= LIMIT_TOTAL - LIMIT_EMP * (1 + matchPct/100)
             const afterTaxTarget = LIMIT_TOTAL - LIMIT_EMP * (1 + matchPct / 100);
             if (afterTaxTarget > 0) {
-                const salaryForAT = (afterTaxTarget * 24) / (afterTaxPct / 100 * t);
+                const salaryForAT = (afterTaxTarget * paychecks) / (afterTaxPct / 100 * t);
                 salaryForTotal = Math.max(salaryForEmp, salaryForAT);
             } else {
                 // Employer match alone fills the gap
@@ -2099,7 +2110,7 @@ function renderProjection(empPct, afterTaxPct, matchPct, limits) {
             <tr>
                 <td style="padding: 0.5rem 0.75rem; font-weight: 500;">${t} checks <span style="color:var(--text-dim); font-weight:400;">(${month})</span></td>
                 <td style="padding: 0.5rem 0.75rem; text-align: right; font-weight: 600; color: var(--accent-light);">${fmt(salaryForEmp)}</td>
-                <td style="padding: 0.5rem 0.75rem; text-align: right; color: var(--text-dim);">${((empPct / 100) * 100).toFixed(0)}% × ${fmt(salaryForEmp / 24)}</td>
+                <td style="padding: 0.5rem 0.75rem; text-align: right; color: var(--text-dim);">${((empPct / 100) * 100).toFixed(0)}% × ${fmt(salaryForEmp / paychecks)}</td>
                 ${afterTaxPct > 0 ? `<td style="padding: 0.5rem 0.75rem; text-align: right; font-weight: 600; color: var(--green);">${salaryForTotal ? fmt(salaryForTotal) : '—'}</td>` : ''}
             </tr>`;
     }
@@ -2124,19 +2135,45 @@ function renderProjection(empPct, afterTaxPct, matchPct, limits) {
             </table>
         </div>
         <p style="font-size: 0.78rem; color: var(--text-dim); margin-top: 0.75rem;">
-            💡 To max employee pre-tax in ≤8 paychecks (${getPaycheckMonth(8)}), you'd need ≥ <strong>${fmt((LIMIT_EMP * 24) / (empPct / 100 * 8))}</strong>/year at ${empPct}% contribution.
+            💡 To max employee pre-tax in ≤8 paychecks (${getPaycheckMonth(8)}), you'd need ≥ <strong>${fmt((LIMIT_EMP * paychecks) / (empPct / 100 * 8))}</strong>/year at ${empPct}% contribution.
         </p>
     `;
 }
 
 function getPaycheckMonth(paycheckNum) {
-    // Semi-monthly: paycheck 1 = Jan 15, paycheck 2 = Jan 31, paycheck 3 = Feb 15, etc.
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const lastDay = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-    const monthIdx = Math.floor((paycheckNum - 1) / 2);
-    const isEndOfMonth = (paycheckNum % 2 === 0); // odd = 15th, even = last day
-    const m = Math.min(monthIdx, 11);
-    return `${months[m]} ${isEndOfMonth ? lastDay[m] : 15}`;
+    const freq = getPaychecks();
+
+    if (freq === 24) {
+        // Semi-monthly: 15th and last day
+        const monthIdx = Math.floor((paycheckNum - 1) / 2);
+        const isEnd = (paycheckNum % 2 === 0);
+        const m = Math.min(monthIdx, 11);
+        return `${months[m]} ${isEnd ? lastDay[m] : 15}`;
+    } else if (freq === 12) {
+        // Monthly: last day of month
+        const m = Math.min(paycheckNum - 1, 11);
+        return `${months[m]} ${lastDay[m]}`;
+    } else if (freq === 26) {
+        // Biweekly: every 14 days starting Jan 10
+        const dayOfYear = (paycheckNum - 1) * 14 + 10;
+        let remaining = dayOfYear;
+        for (let m = 0; m < 12; m++) {
+            if (remaining <= lastDay[m]) return `${months[m]} ${remaining}`;
+            remaining -= lastDay[m];
+        }
+        return 'Dec 31';
+    } else {
+        // Weekly: every 7 days starting Jan 3
+        const dayOfYear = (paycheckNum - 1) * 7 + 3;
+        let remaining = dayOfYear;
+        for (let m = 0; m < 12; m++) {
+            if (remaining <= lastDay[m]) return `${months[m]} ${remaining}`;
+            remaining -= lastDay[m];
+        }
+        return 'Dec 31';
+    }
 }
 
 // ============================================================
@@ -2221,13 +2258,14 @@ function analyzeDebt() {
     }
 
     // Get annual surplus from cash flow (same calculation as renderCashFlow)
+    const paychecks = getPaychecks();
     const salary = parseCurrency(document.getElementById('annualSalary').value);
     if (salary <= 0) {
         el.innerHTML = '<p style="color:var(--text-dim); font-size:0.85rem;">Enter your salary above to see payoff analysis.</p>';
         return;
     }
 
-    const gross = salary / 24;
+    const gross = salary / paychecks;
     const emp401kPct = parseFloat(document.getElementById('contrib401k').value) || 0;
     const matchPct = parseFloat(document.getElementById('employerMatch').value) || 0;
     const afterTaxPct = parseFloat(document.getElementById('afterTax401k').value) || 0;
@@ -2248,15 +2286,15 @@ function analyzeDebt() {
     const espp = gross * (esppPct / 100);
 
     const preTaxPP = emp401k + hsaPP + addInsPP + otherPrePP;
-    const preTaxAnnual = preTaxPP * 24;
-    const fedTaxPP = calcFederalTax(Math.max(0, salary - preTaxAnnual - STANDARD_DEDUCTION[filingStatus]), filingStatus) / 24 + w4Extra;
-    const ficaW = Math.max(0, salary - hsaPP * 24);
+    const preTaxAnnual = preTaxPP * paychecks;
+    const fedTaxPP = calcFederalTax(Math.max(0, salary - preTaxAnnual - STANDARD_DEDUCTION[filingStatus]), filingStatus) / paychecks + w4Extra;
+    const ficaW = Math.max(0, salary - hsaPP * paychecks);
     const fica = calcFICA(ficaW, limits.ssWageBase);
-    const taxesPP = fedTaxPP + fica.ss / 24 + fica.medicare / 24 + calcStateTax(Math.max(0, salary - preTaxAnnual), stateCode) / 24 + (STATE_TAXES[stateCode]?.waCares || 0) * gross;
+    const taxesPP = fedTaxPP + fica.ss / paychecks + fica.medicare / paychecks + calcStateTax(Math.max(0, salary - preTaxAnnual), stateCode) / paychecks + (STATE_TAXES[stateCode]?.waCares || 0) * gross;
 
     // Simulate annual take-home
     let empCum = 0, matchCum = 0, atCum = 0, annualTH = 0;
-    for (let i = 1; i <= 24; i++) {
+    for (let i = 1; i <= paychecks; i++) {
         let e = emp401k; if (empCum + e > limits.emp401k) e = Math.max(0, limits.emp401k - empCum); empCum += e;
         const m = e > 0 ? matchAmt : 0; matchCum += m;
         const sp = limits.total401k - empCum - matchCum - atCum;
@@ -2468,11 +2506,12 @@ async function exportToExcel() {
 
         // Gather values
         const salary = parseCurrency(document.getElementById('annualSalary').value);
-        const gross = salary / 24;
+        const gross = salary / paychecks;
         const filing = document.getElementById('filingStatus').value;
         const state = document.getElementById('state').value;
         const stateName = STATE_TAXES[state]?.name || state;
         const lim = getLimits();
+        const paychecks = getPaychecks();
 
         const emp401kPct = parseFloat(document.getElementById('contrib401k').value) || 0;
         const matchPct = parseFloat(document.getElementById('employerMatch').value) || 0;
@@ -2492,13 +2531,13 @@ async function exportToExcel() {
         const espp = gross * (esppPct / 100);
         const preTaxPP = emp401k + hsa + addIns + otherPre;
         const postTaxPP = afterTax + espp + legal + ltd;
-        const preTaxAnnual = preTaxPP * 24;
+        const preTaxAnnual = preTaxPP * paychecks;
         const stdDed = STANDARD_DEDUCTION[filing];
-        const fedTax = calcFederalTax(Math.max(0, salary - preTaxAnnual - stdDed), filing) / 24 + w4Extra;
-        const ficaW = Math.max(0, salary - hsa * 24);
+        const fedTax = calcFederalTax(Math.max(0, salary - preTaxAnnual - stdDed), filing) / paychecks + w4Extra;
+        const ficaW = Math.max(0, salary - hsa * paychecks);
         const fica = calcFICA(ficaW, lim.ssWageBase);
-        const ssTax = fica.ss / 24;
-        const medTax = fica.medicare / 24;
+        const ssTax = fica.ss / paychecks;
+        const medTax = fica.medicare / paychecks;
         const sTax = calcStateTax(Math.max(0, salary - preTaxAnnual), state) / 24;
         const waCares = (STATE_TAXES[state]?.waCares || 0) * gross;
         const totalTaxPP = fedTax + ssTax + medTax + sTax + waCares;
@@ -2792,7 +2831,7 @@ async function exportToExcel() {
         // Run proper paycheck-by-paycheck 415(c) simulation
         let simEmp = 0, simMatch = 0, simAT = 0;
         let simEmpMaxCk = null, simTotalMaxCk = null;
-        for (let i = 1; i <= 24; i++) {
+        for (let i = 1; i <= paychecks; i++) {
             let e = emp401k;
             if (simEmp + e > lim.emp401k) e = Math.max(0, lim.emp401k - simEmp);
             simEmp += e;
@@ -2818,10 +2857,10 @@ async function exportToExcel() {
         trackerRow(tr++, 'After-Tax (' + afterTaxPct + '%)', afterTaxAnnualCapped, afterTaxSpace);
         trackerRow(tr++, 'Total 415(c)', totalAnnual401k, lim.total401k);
         tr++;
-        const hsaTotalAnnual = Math.min(hsa * 24 + hsaEr, lim.hsa);
-        const hsaOverLimit = (hsa * 24 + hsaEr) > lim.hsa;
-        trackerRow(tr++, 'HSA (You + Employer)', hsa * 24 + hsaEr, lim.hsa);
-        trackerRow(tr++, 'ESPP (' + esppPct + '%)', espp * 24, espp * 24);
+        const hsaTotalAnnual = Math.min(hsa * paychecks + hsaEr, lim.hsa);
+        const hsaOverLimit = (hsa * paychecks + hsaEr) > lim.hsa;
+        trackerRow(tr++, 'HSA (You + Employer)', hsa * paychecks + hsaEr, lim.hsa);
+        trackerRow(tr++, 'ESPP (' + esppPct + '%)', espp * paychecks, espp * paychecks);
 
         // Front-load timeline
         tr += 2;
@@ -2860,7 +2899,7 @@ async function exportToExcel() {
         tr++;
         const empInfos = [
             ['401(k) Match (' + matchPct + '% of yours)', matchAmt, matchAnnualCapped],
-            ['HSA Employer (lump sum)', hsaEr / 24, hsaEr],
+            ['HSA Employer (lump sum)', hsaEr / paychecks, hsaEr],
         ];
         colHeaders(tr, ['', 'Per Paycheck', 'Annual', ''], [6, 7, 8, 9]);
         tr++;
@@ -2890,7 +2929,7 @@ async function exportToExcel() {
 
         const cfTaxesPP = fedTax + ssTax + medTax + sTax + waCares;
 
-        for (let i = 1; i <= 24; i++) {
+        for (let i = 1; i <= paychecks; i++) {
             let e = emp401k;
             if (cfEmpCum + e > cfLimitEmp) e = Math.max(0, cfLimitEmp - cfEmpCum);
             cfEmpCum += e;
@@ -2906,7 +2945,7 @@ async function exportToExcel() {
             cfMonthlyIncome[Math.floor((i - 1) / 2)] += th;
             if (cfPhase1End === null && cfEmpCum >= cfLimitEmp && (cfEmpCum + cfMatchCum + cfATCum) >= cfLimitTotal) cfPhase1End = i;
         }
-        if (!cfPhase1End) cfPhase1End = 24;
+        if (!cfPhase1End) cfPhase1End = paychecks;
 
         const cfMonthlyExpenses = bills.reduce((s,[,a]) => s+a, 0) + spending.reduce((s,[,a]) => s+a, 0) + savings.reduce((s,[,a]) => s+a, 0);
         const cfAnnualExpenses = cfMonthlyExpenses * 12;
