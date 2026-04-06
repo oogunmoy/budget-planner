@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Budget Calculator</title>
+    <title>Budget Builder Pro</title>
     <style>
         :root {
             --bg: #0f1117;
@@ -613,13 +613,79 @@
             .cashflow-phases { grid-template-columns: 1fr; }
             .cf-month-grid { grid-template-columns: repeat(6, 1fr); }
         }
+
+        /* Debt Payoff */
+        .debt-item {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr 1fr 0.7fr 0.7fr 1fr auto;
+            gap: 0.5rem;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .debt-item input, .debt-item select { min-width: 0; }
+
+        .debt-strategy {
+            background: var(--surface2);
+            border-radius: 10px;
+            padding: 1.2rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .debt-strategy .ds-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .debt-strategy .ds-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.3rem 0;
+            font-size: 0.85rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .debt-strategy .ds-row:last-child { border-bottom: none; }
+        .debt-strategy .ds-label { color: var(--text-dim); }
+        .debt-strategy .ds-value { font-weight: 600; }
+
+        .debt-order-list {
+            margin-top: 0.5rem;
+        }
+
+        .debt-order-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.35rem 0;
+            font-size: 0.82rem;
+        }
+
+        .debt-order-num {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 700;
+            background: var(--accent);
+            color: white;
+            flex-shrink: 0;
+        }
+
+        @media (max-width: 768px) {
+            .debt-item { grid-template-columns: 1fr 1fr; }
+        }
     </style>
 </head>
 <body>
 
 <header>
-    <h1>💰 Budget Calculator</h1>
-    <p>Semi-monthly paycheck budget planner with tax estimation</p>
+    <h1>💰 Budget Builder Pro</h1>
+    <p>Semi-monthly paycheck planner with tax estimation, 401(k) front-loading & debt payoff</p>
 </header>
 
 <div class="container">
@@ -797,6 +863,14 @@
     <div class="card" id="cashflowCard" style="display:none;">
         <h2><span class="icon icon-summary">📊</span> Annual Cash Flow Analysis</h2>
         <div id="cashflowContent"></div>
+    </div>
+
+    <!-- Row 4.6: Debt Payoff Planner -->
+    <div class="card">
+        <h2><span class="icon icon-tax">💳</span> Debt Payoff Planner</h2>
+        <div id="debtList"></div>
+        <button class="btn-add" onclick="addDebt();">+ Add Debt</button>
+        <div id="debtAnalysis" style="margin-top: 1rem;"></div>
     </div>
 
     <!-- Row 5: Export to Excel -->
@@ -1995,6 +2069,300 @@ calculate();
 fetchLimits(); // Async: fetch latest limits.json, update if available
 
 // ============================================================
+// Debt Payoff Planner
+// ============================================================
+let debtCounter = 0;
+
+function addDebt() {
+    const list = document.getElementById('debtList');
+    const id = `debt-${++debtCounter}`;
+    const div = document.createElement('div');
+    div.className = 'debt-item';
+    div.id = id;
+    div.innerHTML = `
+        <input type="text" placeholder="Name" oninput="analyzeDebt();" />
+        <select onchange="analyzeDebt();" style="padding:0.5rem;">
+            <option value="credit_card">Credit Card</option>
+            <option value="student_loan">Student Loan</option>
+            <option value="car_loan">Car Loan</option>
+            <option value="personal_loan">Personal Loan</option>
+            <option value="legal_fees">Legal Fees</option>
+            <option value="medical">Medical</option>
+            <option value="other">Other</option>
+        </select>
+        <input type="text" placeholder="Balance" oninput="handleCurrencyInput(this); analyzeDebt();" />
+        <input type="text" placeholder="APR %" oninput="analyzeDebt();" />
+        <input type="text" placeholder="Min Pay" oninput="handleCurrencyInput(this); analyzeDebt();" />
+        <input type="month" onchange="analyzeDebt();" title="Target payoff date" />
+        <button class="btn-remove" onclick="document.getElementById('${id}').remove(); analyzeDebt();" title="Remove">×</button>
+    `;
+    list.appendChild(div);
+
+    if (debtCounter === 1) {
+        const header = document.createElement('div');
+        header.className = 'debt-item';
+        header.id = 'debt-header';
+        header.style.cssText = 'font-size:0.7rem; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.5px; font-weight:600;';
+        header.innerHTML = '<span>Name</span><span>Type</span><span>Balance</span><span>APR %</span><span>Min Pay</span><span>Pay Off By</span><span></span>';
+        list.insertBefore(header, list.firstChild);
+    }
+}
+
+function getDebts() {
+    const debts = [];
+    document.getElementById('debtList').querySelectorAll('.debt-item:not(#debt-header)').forEach(row => {
+        const inputs = row.querySelectorAll('input');
+        const selects = row.querySelectorAll('select');
+        const name = inputs[0].value || 'Unnamed';
+        const type = selects[0]?.value || 'other';
+        const balance = parseCurrency(inputs[1].value);
+        const rate = parseFloat(inputs[2].value) || 0;
+        const minPay = parseCurrency(inputs[3].value);
+        const targetDate = inputs[4]?.value || '';
+        let targetMonths = null;
+        if (targetDate) {
+            const [ty, tm] = targetDate.split('-').map(Number);
+            const now = new Date();
+            targetMonths = (ty - now.getFullYear()) * 12 + (tm - (now.getMonth() + 1));
+            if (targetMonths < 1) targetMonths = 1;
+        }
+        if (balance > 0) debts.push({ name, type, balance, rate: rate / 100, minPay, targetDate, targetMonths });
+    });
+    return debts;
+}
+
+function analyzeDebt() {
+    const debts = getDebts();
+    const el = document.getElementById('debtAnalysis');
+
+    if (debts.length === 0) {
+        el.innerHTML = '';
+        return;
+    }
+
+    // Get annual surplus from cash flow (same calculation as renderCashFlow)
+    const salary = parseCurrency(document.getElementById('annualSalary').value);
+    if (salary <= 0) {
+        el.innerHTML = '<p style="color:var(--text-dim); font-size:0.85rem;">Enter your salary above to see payoff analysis.</p>';
+        return;
+    }
+
+    const gross = salary / 24;
+    const emp401kPct = parseFloat(document.getElementById('contrib401k').value) || 0;
+    const matchPct = parseFloat(document.getElementById('employerMatch').value) || 0;
+    const afterTaxPct = parseFloat(document.getElementById('afterTax401k').value) || 0;
+    const esppPct = parseFloat(document.getElementById('espp').value) || 0;
+    const hsaPP = parseCurrency(document.getElementById('hsaPerPaycheck').value);
+    const addInsPP = parseCurrency(document.getElementById('addInsurance').value);
+    const otherPrePP = parseCurrency(document.getElementById('otherPreTax').value);
+    const legalPP = parseCurrency(document.getElementById('legalPlan').value);
+    const ltdPP = parseCurrency(document.getElementById('ltdOffset').value);
+    const w4Extra = parseCurrency(document.getElementById('w4Extra').value);
+    const filingStatus = document.getElementById('filingStatus').value;
+    const stateCode = document.getElementById('state').value;
+    const limits = getLimits();
+
+    const emp401k = gross * (emp401kPct / 100);
+    const matchAmt = emp401k * (matchPct / 100);
+    const afterTax = gross * (afterTaxPct / 100);
+    const espp = gross * (esppPct / 100);
+
+    const preTaxPP = emp401k + hsaPP + addInsPP + otherPrePP;
+    const preTaxAnnual = preTaxPP * 24;
+    const fedTaxPP = calcFederalTax(Math.max(0, salary - preTaxAnnual - STANDARD_DEDUCTION[filingStatus]), filingStatus) / 24 + w4Extra;
+    const ficaW = Math.max(0, salary - hsaPP * 24);
+    const fica = calcFICA(ficaW, limits.ssWageBase);
+    const taxesPP = fedTaxPP + fica.ss / 24 + fica.medicare / 24 + calcStateTax(Math.max(0, salary - preTaxAnnual), stateCode) / 24 + (STATE_TAXES[stateCode]?.waCares || 0) * gross;
+
+    // Simulate annual take-home
+    let empCum = 0, matchCum = 0, atCum = 0, annualTH = 0;
+    for (let i = 1; i <= 24; i++) {
+        let e = emp401k; if (empCum + e > limits.emp401k) e = Math.max(0, limits.emp401k - empCum); empCum += e;
+        const m = e > 0 ? matchAmt : 0; matchCum += m;
+        const sp = limits.total401k - empCum - matchCum - atCum;
+        let at = Math.min(afterTax, Math.max(0, sp)); atCum += at;
+        annualTH += gross - (e + hsaPP + addInsPP + otherPrePP) - taxesPP - (at + espp + legalPP + ltdPP);
+    }
+
+    const monthlyExpenses = getCategoryTotal('bills') + getCategoryTotal('spending') + getCategoryTotal('savings');
+    const annualExpenses = monthlyExpenses * 12;
+    const annualSurplus = annualTH - annualExpenses;
+    const monthlySurplus = annualSurplus / 12;
+
+    const totalDebt = debts.reduce((s, d) => s + d.balance, 0);
+    const totalMinPayments = debts.reduce((s, d) => s + d.minPay, 0);
+
+    // Simulate payoff with a given strategy
+    function simulatePayoff(debtsIn, extraMonthly, strategy) {
+        let remaining = debtsIn.map(d => ({ ...d, bal: d.balance }));
+        let months = 0;
+        let totalInterest = 0;
+        const maxMonths = 360;
+
+        // Sort by strategy
+        if (strategy === 'avalanche') remaining.sort((a, b) => b.rate - a.rate);
+        else remaining.sort((a, b) => a.bal - b.bal);
+
+        const order = remaining.map(d => d.name);
+
+        while (remaining.length > 0 && months < maxMonths) {
+            months++;
+            let extra = extraMonthly;
+
+            // Apply interest
+            remaining.forEach(d => {
+                const interest = d.bal * (d.rate / 12);
+                d.bal += interest;
+                totalInterest += interest;
+            });
+
+            // Pay minimums first
+            remaining.forEach(d => {
+                const pay = Math.min(d.minPay, d.bal);
+                d.bal -= pay;
+            });
+
+            // Apply extra to target debt
+            for (let i = 0; i < remaining.length && extra > 0; i++) {
+                const pay = Math.min(extra, remaining[i].bal);
+                remaining[i].bal -= pay;
+                extra -= pay;
+            }
+
+            remaining = remaining.filter(d => d.bal > 0.01);
+        }
+
+        return { months, totalInterest, order };
+    }
+
+    if (monthlySurplus <= 0) {
+        el.innerHTML = `
+            <div style="background: rgba(225,112,85,0.15); color: var(--red); padding: 1rem; border-radius: 10px; font-size: 0.85rem;">
+                ⚠️ <strong>No surplus available for debt payoff.</strong> Your annual expenses (${fmt(annualExpenses)}) exceed your blended take-home (${fmt(annualTH)}). 
+                Reduce expenses by ${fmt(Math.abs(annualSurplus))}/year to free up debt payment capacity.
+            </div>
+        `;
+        return;
+    }
+
+    const extraForDebt = Math.max(0, monthlySurplus - totalMinPayments) + totalMinPayments;
+
+    const avalanche = simulatePayoff(debts, monthlySurplus, 'avalanche');
+    const snowball = simulatePayoff(debts, monthlySurplus, 'snowball');
+    const minOnly = simulatePayoff(debts, 0, 'avalanche');
+
+    function monthsToYM(m) {
+        const y = Math.floor(m / 12);
+        const mo = m % 12;
+        return y > 0 ? `${y}y ${mo}m` : `${mo} months`;
+    }
+
+    // Calculate required monthly payment for each debt with a target date
+    function calcRequiredPayment(balance, rate, months) {
+        if (months <= 0) return balance;
+        if (rate === 0) return balance / months;
+        const r = rate / 12;
+        return balance * (r * Math.pow(1 + r, months)) / (Math.pow(1 + r, months) - 1);
+    }
+
+    const targetPlans = debts.filter(d => d.targetMonths).map(d => {
+        const reqPay = calcRequiredPayment(d.balance, d.rate, d.targetMonths);
+        const totalPaid = reqPay * d.targetMonths;
+        const totalInterest = totalPaid - d.balance;
+        const feasible = reqPay <= monthlySurplus;
+        return { ...d, reqPay, totalPaid, totalInterest, feasible };
+    });
+
+    const totalReqForTargets = targetPlans.reduce((s, p) => s + p.reqPay, 0);
+
+    // Build per-debt payment plan HTML
+    const planHTML = targetPlans.length > 0 ? `
+        <div style="margin-top: 1.25rem;">
+            <h3 style="font-size: 0.95rem; color: var(--text-dim); margin-bottom: 0.75rem;">📅 Target Payoff Plans</h3>
+            ${targetPlans.map(p => `
+                <div class="debt-strategy" style="border-left: 4px solid ${p.feasible ? 'var(--green)' : 'var(--red)'}; margin-bottom: 0.5rem;">
+                    <div class="ds-title">${p.name} <span style="color:var(--text-dim); font-weight:400;">· ${p.type.replace(/_/g, ' ')} · Pay off by ${p.targetDate}</span></div>
+                    <div class="ds-row"><span class="ds-label">Balance</span><span class="ds-value">${fmt(p.balance)}</span></div>
+                    <div class="ds-row"><span class="ds-label">APR</span><span class="ds-value">${(p.rate * 100).toFixed(1)}%</span></div>
+                    <div class="ds-row"><span class="ds-label">Required Monthly Payment</span><span class="ds-value" style="color: ${p.feasible ? 'var(--green)' : 'var(--red)'};">${fmt(p.reqPay)}/mo</span></div>
+                    <div class="ds-row"><span class="ds-label">Total Interest</span><span class="ds-value negative">${fmt(p.totalInterest)}</span></div>
+                    <div class="ds-row"><span class="ds-label">Total Paid</span><span class="ds-value">${fmt(p.totalPaid)}</span></div>
+                    <div class="ds-row"><span class="ds-label">Timeline</span><span class="ds-value">${monthsToYM(p.targetMonths)}</span></div>
+                    ${!p.feasible ? '<div style="color:var(--red); font-size:0.8rem; margin-top:0.4rem;">⚠️ Required payment exceeds your monthly surplus</div>' : '<div style="color:var(--green); font-size:0.8rem; margin-top:0.4rem;">✅ Feasible within your surplus</div>'}
+                </div>
+            `).join('')}
+            <div class="summary-grid" style="margin-top: 0.5rem;">
+                <div class="summary-stat">
+                    <div class="label">Total Required for Targets</div>
+                    <div class="value ${totalReqForTargets <= monthlySurplus ? 'positive' : 'negative'}">${fmt(totalReqForTargets)}/mo</div>
+                    <div class="sub">${totalReqForTargets <= monthlySurplus ? 'Fits within your surplus ✓' : 'Exceeds surplus by ' + fmt(totalReqForTargets - monthlySurplus) + '/mo ⚠️'}</div>
+                </div>
+                <div class="summary-stat">
+                    <div class="label">Surplus After Targets</div>
+                    <div class="value ${monthlySurplus - totalReqForTargets >= 0 ? 'positive' : 'negative'}">${fmt(monthlySurplus - totalReqForTargets)}/mo</div>
+                </div>
+            </div>
+        </div>
+    ` : '';
+
+    el.innerHTML = `
+        <div class="summary-grid" style="margin-bottom: 1rem;">
+            <div class="summary-stat">
+                <div class="label">Total Debt</div>
+                <div class="value negative">${fmt(totalDebt)}</div>
+            </div>
+            <div class="summary-stat">
+                <div class="label">Monthly Surplus</div>
+                <div class="value positive">${fmt(monthlySurplus)}</div>
+                <div class="sub">From annual cash flow</div>
+            </div>
+            <div class="summary-stat">
+                <div class="label">Min Payments</div>
+                <div class="value" style="color: var(--orange);">${fmt(totalMinPayments)}/mo</div>
+            </div>
+            <div class="summary-stat">
+                <div class="label">Available for Debt</div>
+                <div class="value" style="color: var(--accent-light);">${fmt(monthlySurplus)}/mo</div>
+                <div class="sub">Surplus applied to debt</div>
+            </div>
+        </div>
+
+        ${planHTML}
+
+        <h3 style="font-size: 0.95rem; color: var(--text-dim); margin: 1.25rem 0 0.75rem;">🔄 Strategy Comparison (using full surplus)</h3>
+        <div class="grid-2">
+            <div class="debt-strategy" style="border-left: 4px solid var(--green);">
+                <div class="ds-title" style="color: var(--green);">🏔️ Avalanche (Highest Interest First)</div>
+                <div class="ds-row"><span class="ds-label">Payoff Time</span><span class="ds-value">${monthsToYM(avalanche.months)}</span></div>
+                <div class="ds-row"><span class="ds-label">Total Interest Paid</span><span class="ds-value negative">${fmt(avalanche.totalInterest)}</span></div>
+                <div class="ds-row"><span class="ds-label">Interest Saved vs Min-Only</span><span class="ds-value positive">${fmt(minOnly.totalInterest - avalanche.totalInterest)}</span></div>
+                <div class="debt-order-list">
+                    <div style="font-size:0.75rem; color:var(--text-dim); margin-bottom:0.25rem;">Payment order:</div>
+                    ${avalanche.order.map((n, i) => `<div class="debt-order-item"><span class="debt-order-num">${i + 1}</span>${n}</div>`).join('')}
+                </div>
+            </div>
+
+            <div class="debt-strategy" style="border-left: 4px solid var(--blue);">
+                <div class="ds-title" style="color: var(--blue);">⛄ Snowball (Smallest Balance First)</div>
+                <div class="ds-row"><span class="ds-label">Payoff Time</span><span class="ds-value">${monthsToYM(snowball.months)}</span></div>
+                <div class="ds-row"><span class="ds-label">Total Interest Paid</span><span class="ds-value negative">${fmt(snowball.totalInterest)}</span></div>
+                <div class="ds-row"><span class="ds-label">Interest Saved vs Min-Only</span><span class="ds-value positive">${fmt(minOnly.totalInterest - snowball.totalInterest)}</span></div>
+                <div class="debt-order-list">
+                    <div style="font-size:0.75rem; color:var(--text-dim); margin-bottom:0.25rem;">Payment order:</div>
+                    ${snowball.order.map((n, i) => `<div class="debt-order-item"><span class="debt-order-num">${i + 1}</span>${n}</div>`).join('')}
+                </div>
+            </div>
+        </div>
+
+        <div style="background: var(--surface2); border-radius: 10px; padding: 1rem; margin-top: 0.75rem; font-size: 0.82rem; color: var(--text-dim);">
+            💡 <strong>Minimum payments only:</strong> ${monthsToYM(minOnly.months)} · ${fmt(minOnly.totalInterest)} in interest.
+            By applying your ${fmt(monthlySurplus)}/mo surplus, you save <strong style="color:var(--green);">${fmt(minOnly.totalInterest - avalanche.totalInterest)}</strong> in interest (avalanche) and pay off 
+            <strong style="color:var(--green);">${monthsToYM(minOnly.months - avalanche.months)}</strong> faster.
+        </div>
+    `;
+}
+
+// ============================================================
 // Export to Excel (ExcelJS — with full styling)
 // ============================================================
 async function exportToExcel() {
@@ -2272,50 +2640,38 @@ async function exportToExcel() {
 
         // Budget: Bills
         r += 2;
-        sectionHeader(r, 1, 4, '🏠 BILLS', blueBg);
-        r++; colHeaders(r, ['', 'Amount', 'Remaining', 'Monthly'], [1, 2, 3, 4]); r++;
+        sectionHeader(r, 1, 2, '🏠 BILLS', blueBg);
+        r++; colHeaders(r, ['', 'Amount'], [1, 2]); r++;
         bills.forEach(([name, amt]) => {
-            if (name) { bal -= amt; dataRow(r++, name, amt, bal, bal * 2); }
+            if (name) dataRow(r++, name, amt, null, null);
         });
         const billsT = bills.reduce((s, [, a]) => s + a, 0);
-        dataRow(r, 'Total Bills', billsT, bal, bal * 2, { bold: true });
+        dataRow(r, 'Total Bills', billsT, null, null, { bold: true });
 
         // Budget: Spending
         r += 2;
-        sectionHeader(r, 1, 4, '🛒 SPENDING', { argb: 'FF00B894' });
-        r++; colHeaders(r, ['', 'Amount', 'Remaining', 'Monthly'], [1, 2, 3, 4]); r++;
+        sectionHeader(r, 1, 2, '🛒 SPENDING', { argb: 'FF00B894' });
+        r++; colHeaders(r, ['', 'Amount'], [1, 2]); r++;
         spending.forEach(([name, amt]) => {
-            if (name) { bal -= amt; dataRow(r++, name, amt, bal, bal * 2); }
+            if (name) dataRow(r++, name, amt, null, null);
         });
         const spendT = spending.reduce((s, [, a]) => s + a, 0);
-        dataRow(r, 'Total Spending', spendT, bal, bal * 2, { bold: true });
+        dataRow(r, 'Total Spending', spendT, null, null, { bold: true });
 
         // Budget: Savings
         r += 2;
-        sectionHeader(r, 1, 4, '📈 SAVINGS', { argb: 'FFA29BFE' });
-        r++; colHeaders(r, ['', 'Amount', 'Remaining', 'Monthly'], [1, 2, 3, 4]); r++;
+        sectionHeader(r, 1, 2, '📈 SAVINGS', { argb: 'FFA29BFE' });
+        r++; colHeaders(r, ['', 'Amount'], [1, 2]); r++;
         savings.forEach(([name, amt]) => {
-            if (name) { bal -= amt; dataRow(r++, name, amt, bal, bal * 2); }
+            if (name) dataRow(r++, name, amt, null, null);
         });
         const savT = savings.reduce((s, [, a]) => s + a, 0);
-        dataRow(r, 'Total Savings', savT, bal, bal * 2, { bold: true });
+        dataRow(r, 'Total Savings', savT, null, null, { bold: true });
 
-        // REMAINING
+        // Total monthly expenses
         r += 2;
-        sectionHeader(r, 1, 4, bal >= 0 ? '✅ SURPLUS' : '⚠️ OVER BUDGET', bal >= 0 ? greenBg : redBg);
-        r++;
-        const remCell = ws.getCell(r, 1);
-        remCell.value = 'Remaining per Paycheck';
-        remCell.font = { bold: true, size: 12 };
-        remCell.border = borders;
-        [3, 4].forEach(c => {
-            const cell = ws.getCell(r, c);
-            cell.value = R(c === 3 ? bal : bal * 2);
-            cell.numFmt = CF;
-            cell.font = { bold: true, size: 12, color: bal >= 0 ? { argb: 'FF00B894' } : { argb: 'FFE17055' } };
-            cell.border = borders;
-            cell.alignment = { horizontal: 'right' };
-        });
+        const totalExpenses = billsT + spendT + savT;
+        dataRow(r, 'Total Monthly Expenses', totalExpenses, null, null, { bold: true });
 
         // ===== RIGHT SIDE: Contribution Tracker (F-I) =====
         const cr = 3;
@@ -2438,6 +2794,252 @@ async function exportToExcel() {
             ws.getCell(tr, 8).border = borders; ws.getCell(tr, 8).alignment = { horizontal: 'right' };
             tr++;
         });
+
+        // ===== CASH FLOW ANALYSIS SECTION (right side, below employer) =====
+        tr += 2;
+        sectionHeader(tr, 6, 9, '📊 Annual Cash Flow (Front-Load Adjusted)', accentBg);
+        tr++;
+
+        // Simulate paycheck-by-paycheck take-home
+        const cfLimitEmp = lim.emp401k;
+        const cfLimitTotal = lim.total401k;
+        let cfEmpCum = 0, cfMatchCum = 0, cfATCum = 0;
+        const cfMonthlyIncome = new Array(12).fill(0);
+        let cfAnnualTakeHome = 0;
+        let cfPhase1End = null;
+
+        const cfTaxesPP = fedTax + ssTax + medTax + sTax + waCares;
+
+        for (let i = 1; i <= 24; i++) {
+            let e = emp401k;
+            if (cfEmpCum + e > cfLimitEmp) e = Math.max(0, cfLimitEmp - cfEmpCum);
+            cfEmpCum += e;
+            const m = e > 0 ? matchAmt : 0;
+            cfMatchCum += m;
+            const cfSpace = cfLimitTotal - cfEmpCum - cfMatchCum - cfATCum;
+            let at = Math.min(afterTax, Math.max(0, cfSpace));
+            cfATCum += at;
+            const preTaxThis = e + hsa + addIns + otherPre;
+            const postTaxThis = at + espp + legal + ltd;
+            const th = gross - preTaxThis - cfTaxesPP - postTaxThis;
+            cfAnnualTakeHome += th;
+            cfMonthlyIncome[Math.floor((i - 1) / 2)] += th;
+            if (cfPhase1End === null && cfEmpCum >= cfLimitEmp && (cfEmpCum + cfMatchCum + cfATCum) >= cfLimitTotal) cfPhase1End = i;
+        }
+        if (!cfPhase1End) cfPhase1End = 24;
+
+        const cfMonthlyExpenses = bills.reduce((s,[,a]) => s+a, 0) + spending.reduce((s,[,a]) => s+a, 0) + savings.reduce((s,[,a]) => s+a, 0);
+        const cfAnnualExpenses = cfMonthlyExpenses * 12;
+        const cfMonthlyBudget = cfAnnualTakeHome / 12;
+        const cfAnnualSurplus = cfAnnualTakeHome - cfAnnualExpenses;
+
+        // Cumulative cash flow to find buffer needed
+        let cfCum = 0, cfMaxDeficit = 0;
+        const cfMonthlyCF = cfMonthlyIncome.map(inc => inc - cfMonthlyExpenses);
+        cfMonthlyCF.forEach(cf => { cfCum += cf; if (cfCum < cfMaxDeficit) cfMaxDeficit = cfCum; });
+        const cfBuffer = Math.abs(Math.min(0, cfMaxDeficit));
+
+        const cfPhase1Mo = Math.ceil(cfPhase1End / 2);
+        const cfMonths = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+        // Annual summary
+        colHeaders(tr, ['', 'Amount', 'Monthly', ''], [6, 7, 8, 9]);
+        tr++;
+
+        function cfRow(row, label, amount, monthly, color) {
+            const stripe = row % 2 === 0 ? { argb: 'FFFAFAFA' } : { argb: 'FFFFFFFF' };
+            ws.getCell(row, 6).value = label;
+            ws.getCell(row, 6).font = { size: 10.5, bold: !!color };
+            ws.getCell(row, 6).border = borders;
+            ws.getCell(row, 6).fill = { type: 'pattern', pattern: 'solid', fgColor: stripe };
+            if (amount != null) {
+                ws.getCell(row, 7).value = R(amount); ws.getCell(row, 7).numFmt = CF;
+                ws.getCell(row, 7).font = { size: 10.5, color: color || darkText };
+                ws.getCell(row, 7).border = borders; ws.getCell(row, 7).alignment = { horizontal: 'right' };
+                ws.getCell(row, 7).fill = { type: 'pattern', pattern: 'solid', fgColor: stripe };
+            }
+            if (monthly != null) {
+                ws.getCell(row, 8).value = R(monthly); ws.getCell(row, 8).numFmt = CF;
+                ws.getCell(row, 8).font = { size: 10.5, color: color || darkText };
+                ws.getCell(row, 8).border = borders; ws.getCell(row, 8).alignment = { horizontal: 'right' };
+                ws.getCell(row, 8).fill = { type: 'pattern', pattern: 'solid', fgColor: stripe };
+            }
+        }
+
+        cfRow(tr++, 'Annual Take-Home (Blended)', cfAnnualTakeHome, cfMonthlyBudget, { argb: 'FF00B894' });
+        cfRow(tr++, 'Annual Expenses', cfAnnualExpenses, cfMonthlyExpenses);
+        cfRow(tr++, 'Annual Surplus/Deficit', cfAnnualSurplus, cfAnnualSurplus / 12,
+            cfAnnualSurplus >= 0 ? { argb: 'FF00B894' } : { argb: 'FFE17055' });
+        if (cfBuffer > 0) {
+            cfRow(tr++, 'Savings Buffer Needed', cfBuffer, null, { argb: 'FFFDCB6E' });
+        }
+        tr++;
+
+        // Monthly breakdown
+        sectionHeader(tr, 6, 9, '📅 Monthly Cash Flow', { argb: 'FF636E72' });
+        tr++;
+        colHeaders(tr, ['Month', 'Take-Home', 'Expenses', 'Cash Flow'], [6, 7, 8, 9]);
+        tr++;
+
+        cfMonths.forEach((month, i) => {
+            const stripe = tr % 2 === 0 ? { argb: 'FFFAFAFA' } : { argb: 'FFFFFFFF' };
+            const cf = cfMonthlyCF[i];
+            const isDeficit = cf < 0;
+            ws.getCell(tr, 6).value = month + (i < cfPhase1Mo ? ' ⚡' : ' 🎉');
+            ws.getCell(tr, 6).font = { size: 10.5 };
+            ws.getCell(tr, 6).border = borders;
+            ws.getCell(tr, 6).fill = { type: 'pattern', pattern: 'solid', fgColor: stripe };
+
+            ws.getCell(tr, 7).value = R(cfMonthlyIncome[i]); ws.getCell(tr, 7).numFmt = CF;
+            ws.getCell(tr, 7).border = borders; ws.getCell(tr, 7).alignment = { horizontal: 'right' };
+            ws.getCell(tr, 7).fill = { type: 'pattern', pattern: 'solid', fgColor: stripe };
+
+            ws.getCell(tr, 8).value = R(cfMonthlyExpenses); ws.getCell(tr, 8).numFmt = CF;
+            ws.getCell(tr, 8).border = borders; ws.getCell(tr, 8).alignment = { horizontal: 'right' };
+            ws.getCell(tr, 8).fill = { type: 'pattern', pattern: 'solid', fgColor: stripe };
+
+            ws.getCell(tr, 9).value = R(cf); ws.getCell(tr, 9).numFmt = CF;
+            ws.getCell(tr, 9).font = { size: 10.5, bold: true, color: isDeficit ? { argb: 'FFE17055' } : { argb: 'FF00B894' } };
+            ws.getCell(tr, 9).border = borders; ws.getCell(tr, 9).alignment = { horizontal: 'right' };
+            ws.getCell(tr, 9).fill = { type: 'pattern', pattern: 'solid', fgColor: stripe };
+            tr++;
+        });
+
+        // Phase summary row
+        tr++;
+        ws.getCell(tr, 6).value = '⚡ = Front-loading phase · 🎉 = After max-out';
+        ws.getCell(tr, 6).font = { size: 9, color: dimText, italic: true };
+        ws.getCell(tr+1, 6).value = 'Monthly Budget Target: ' + fmt(cfMonthlyBudget) + '/mo (annual ÷ 12)';
+        ws.getCell(tr+1, 6).font = { size: 9, color: dimText, italic: true };
+        tr += 3;
+
+        // ===== DEBT PAYOFF SECTION =====
+        const debts = getDebts();
+        if (debts.length > 0) {
+            const debtTotalBal = debts.reduce((s, d) => s + d.balance, 0);
+            const debtTotalMin = debts.reduce((s, d) => s + d.minPay, 0);
+            const debtSurplus = cfAnnualSurplus > 0 ? cfAnnualSurplus / 12 : 0;
+
+            sectionHeader(tr, 6, 9, '💳 Debt Payoff Planner', redBg);
+            tr++;
+            colHeaders(tr, ['Debt', 'Balance', 'APR', 'Min Payment'], [6, 7, 8, 9]);
+            tr++;
+
+            debts.forEach(d => {
+                const stripe = tr % 2 === 0 ? { argb: 'FFFAFAFA' } : { argb: 'FFFFFFFF' };
+                ws.getCell(tr, 6).value = d.name + ' (' + d.type.replace(/_/g, ' ') + ')';
+                ws.getCell(tr, 6).font = { size: 10.5 }; ws.getCell(tr, 6).border = borders;
+                ws.getCell(tr, 6).fill = { type: 'pattern', pattern: 'solid', fgColor: stripe };
+                ws.getCell(tr, 7).value = R(d.balance); ws.getCell(tr, 7).numFmt = CF;
+                ws.getCell(tr, 7).border = borders; ws.getCell(tr, 7).alignment = { horizontal: 'right' };
+                ws.getCell(tr, 7).fill = { type: 'pattern', pattern: 'solid', fgColor: stripe };
+                ws.getCell(tr, 8).value = (d.rate * 100).toFixed(1) + '%';
+                ws.getCell(tr, 8).border = borders; ws.getCell(tr, 8).alignment = { horizontal: 'right' };
+                ws.getCell(tr, 8).fill = { type: 'pattern', pattern: 'solid', fgColor: stripe };
+                ws.getCell(tr, 9).value = R(d.minPay); ws.getCell(tr, 9).numFmt = CF;
+                ws.getCell(tr, 9).border = borders; ws.getCell(tr, 9).alignment = { horizontal: 'right' };
+                ws.getCell(tr, 9).fill = { type: 'pattern', pattern: 'solid', fgColor: stripe };
+                tr++;
+            });
+
+            // Totals row
+            ws.getCell(tr, 6).value = 'Total'; ws.getCell(tr, 6).font = { bold: true, size: 10.5 }; ws.getCell(tr, 6).border = borders;
+            ws.getCell(tr, 7).value = R(debtTotalBal); ws.getCell(tr, 7).numFmt = CF; ws.getCell(tr, 7).font = { bold: true }; ws.getCell(tr, 7).border = borders; ws.getCell(tr, 7).alignment = { horizontal: 'right' };
+            ws.getCell(tr, 9).value = R(debtTotalMin); ws.getCell(tr, 9).numFmt = CF; ws.getCell(tr, 9).font = { bold: true }; ws.getCell(tr, 9).border = borders; ws.getCell(tr, 9).alignment = { horizontal: 'right' };
+            tr += 2;
+
+            // Target payoff plans
+            const targetDebts = debts.filter(d => d.targetMonths);
+            if (targetDebts.length > 0) {
+                sectionHeader(tr, 6, 9, '📅 Target Payoff Plans', { argb: 'FF636E72' });
+                tr++;
+                colHeaders(tr, ['Debt', 'Pay Off By', 'Required/mo', 'Total Interest'], [6, 7, 8, 9]);
+                tr++;
+
+                function calcReqPay(bal, rate, months) {
+                    if (months <= 0) return bal;
+                    if (rate === 0) return bal / months;
+                    const r = rate / 12;
+                    return bal * (r * Math.pow(1 + r, months)) / (Math.pow(1 + r, months) - 1);
+                }
+
+                let totalReq = 0;
+                targetDebts.forEach(d => {
+                    const req = calcReqPay(d.balance, d.rate, d.targetMonths);
+                    const totalInt = req * d.targetMonths - d.balance;
+                    totalReq += req;
+                    const feasible = req <= debtSurplus;
+                    const stripe = tr % 2 === 0 ? { argb: 'FFFAFAFA' } : { argb: 'FFFFFFFF' };
+
+                    ws.getCell(tr, 6).value = d.name;
+                    ws.getCell(tr, 6).font = { size: 10.5 }; ws.getCell(tr, 6).border = borders;
+                    ws.getCell(tr, 6).fill = { type: 'pattern', pattern: 'solid', fgColor: stripe };
+                    ws.getCell(tr, 7).value = d.targetDate;
+                    ws.getCell(tr, 7).border = borders; ws.getCell(tr, 7).alignment = { horizontal: 'right' };
+                    ws.getCell(tr, 7).fill = { type: 'pattern', pattern: 'solid', fgColor: stripe };
+                    ws.getCell(tr, 8).value = R(req); ws.getCell(tr, 8).numFmt = CF;
+                    ws.getCell(tr, 8).font = { size: 10.5, color: feasible ? { argb: 'FF00B894' } : { argb: 'FFE17055' } };
+                    ws.getCell(tr, 8).border = borders; ws.getCell(tr, 8).alignment = { horizontal: 'right' };
+                    ws.getCell(tr, 8).fill = { type: 'pattern', pattern: 'solid', fgColor: stripe };
+                    ws.getCell(tr, 9).value = R(totalInt); ws.getCell(tr, 9).numFmt = CF;
+                    ws.getCell(tr, 9).font = { size: 10.5, color: { argb: 'FFE17055' } };
+                    ws.getCell(tr, 9).border = borders; ws.getCell(tr, 9).alignment = { horizontal: 'right' };
+                    ws.getCell(tr, 9).fill = { type: 'pattern', pattern: 'solid', fgColor: stripe };
+                    tr++;
+                });
+
+                ws.getCell(tr, 6).value = 'Total Required'; ws.getCell(tr, 6).font = { bold: true }; ws.getCell(tr, 6).border = borders;
+                ws.getCell(tr, 8).value = R(totalReq); ws.getCell(tr, 8).numFmt = CF; ws.getCell(tr, 8).font = { bold: true }; ws.getCell(tr, 8).border = borders; ws.getCell(tr, 8).alignment = { horizontal: 'right' };
+                tr += 2;
+            }
+
+            // Strategy comparison
+            function simPayoff(debtsIn, extra, strategy) {
+                let rem = debtsIn.map(d => ({ ...d, bal: d.balance }));
+                let months = 0, totInt = 0;
+                if (strategy === 'avalanche') rem.sort((a, b) => b.rate - a.rate);
+                else rem.sort((a, b) => a.bal - b.bal);
+                const order = rem.map(d => d.name);
+                while (rem.length > 0 && months < 360) {
+                    months++;
+                    let ex = extra;
+                    rem.forEach(d => { const i = d.bal * (d.rate / 12); d.bal += i; totInt += i; });
+                    rem.forEach(d => { const p = Math.min(d.minPay, d.bal); d.bal -= p; });
+                    for (let i = 0; i < rem.length && ex > 0; i++) {
+                        const p = Math.min(ex, rem[i].bal); rem[i].bal -= p; ex -= p;
+                    }
+                    rem = rem.filter(d => d.bal > 0.01);
+                }
+                return { months, totInt, order };
+            }
+
+            if (debtSurplus > 0) {
+                const aval = simPayoff(debts, debtSurplus, 'avalanche');
+                const snow = simPayoff(debts, debtSurplus, 'snowball');
+                const monly = simPayoff(debts, 0, 'avalanche');
+                function ym(m) { const y = Math.floor(m/12); const mo = m%12; return y > 0 ? y+'y '+mo+'m' : mo+' months'; }
+
+                sectionHeader(tr, 6, 9, '🔄 Strategy Comparison (' + fmt(debtSurplus) + '/mo)', accentBg);
+                tr++;
+                colHeaders(tr, ['Strategy', 'Payoff Time', 'Interest Paid', 'Interest Saved'], [6, 7, 8, 9]);
+                tr++;
+
+                [['🏔️ Avalanche', aval], ['⛄ Snowball', snow], ['⏳ Min-Only', monly]].forEach(([label, res]) => {
+                    const stripe = tr % 2 === 0 ? { argb: 'FFFAFAFA' } : { argb: 'FFFFFFFF' };
+                    ws.getCell(tr, 6).value = label; ws.getCell(tr, 6).font = { size: 10.5 }; ws.getCell(tr, 6).border = borders;
+                    ws.getCell(tr, 6).fill = { type: 'pattern', pattern: 'solid', fgColor: stripe };
+                    ws.getCell(tr, 7).value = ym(res.months); ws.getCell(tr, 7).border = borders; ws.getCell(tr, 7).alignment = { horizontal: 'right' };
+                    ws.getCell(tr, 7).fill = { type: 'pattern', pattern: 'solid', fgColor: stripe };
+                    ws.getCell(tr, 8).value = R(res.totInt); ws.getCell(tr, 8).numFmt = CF;
+                    ws.getCell(tr, 8).font = { color: { argb: 'FFE17055' } }; ws.getCell(tr, 8).border = borders; ws.getCell(tr, 8).alignment = { horizontal: 'right' };
+                    ws.getCell(tr, 8).fill = { type: 'pattern', pattern: 'solid', fgColor: stripe };
+                    ws.getCell(tr, 9).value = R(monly.totInt - res.totInt); ws.getCell(tr, 9).numFmt = CF;
+                    ws.getCell(tr, 9).font = { color: { argb: 'FF00B894' } }; ws.getCell(tr, 9).border = borders; ws.getCell(tr, 9).alignment = { horizontal: 'right' };
+                    ws.getCell(tr, 9).fill = { type: 'pattern', pattern: 'solid', fgColor: stripe };
+                    tr++;
+                });
+            }
+        }
 
         // Generate file
         const buf = await wb.xlsx.writeBuffer();
