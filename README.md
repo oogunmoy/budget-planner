@@ -1,13 +1,13 @@
-# 💰 Budget Builder Pro
+# 💰 Budget Builder
 
-A comprehensive semi-monthly paycheck planner with tax estimation, 401(k) front-loading, and debt payoff analysis. Runs entirely in the browser — no server, no login, no dependencies.
+A comprehensive paycheck planner with tax estimation, 401(k) front-loading, and debt payoff analysis. Runs entirely in the browser — no server, no login, no dependencies.
 
-**[Launch Budget Builder Pro →](https://oogunmoy.github.io/budget-planner/)**
+**[Launch Budget Builder →](https://oogunmoy.github.io/budget-planner/)**
 
 ## Features
 
 ### 💵 Income & Tax Estimation
-- Annual salary input with semi-monthly paycheck breakdown (24 paychecks/year)
+- Annual salary input with configurable **pay frequency** (weekly, biweekly, semi-monthly, monthly)
 - 2026 federal tax brackets for all filing statuses (Single, MFJ, MFS, HoH)
 - State income tax for all 50 states + DC
 - FICA (Social Security + Medicare) with proper HSA exemptions
